@@ -471,27 +471,28 @@ local Killaura = windowapi.CreateButton({
 			repeat
 				if nearestID ~= nil then
 				end
-				local nearest = getnearestplayer(Distance["Value"])
-				nearestID = nearest
-				local targetHP = math.floor(nearest.Character.Humanoid.Health + 0.5) / 10
-				target = nearest.Name
-				if nearest.Team ~= lplr.Team and nearest ~= lplr then
-					local sword = getSword()
-					if sword ~= nil then
-						bedwars["SwordController"].lastAttack = game:GetService("Workspace"):GetServerTimeNow() - 0.11
-						HitRemote:SendToServer({
-							["weapon"] = sword.tool,
-							["entityInstance"] = nearest.Character,
-							["validate"] = {
-								["raycast"] = {
-									["cameraPosition"] = hashFunc(cam.CFrame.Position),
-									["cursorDirection"] = hashFunc(Ray.new(cam.CFrame.Position, nearest.Character:FindFirstChild("HumanoidRootPart").Position).Unit.Direction)
+				for _,v in pairs(game.Players:GetPlayers()) do
+					nearestID = v
+					local targetHP = math.floor(v.Character.Humanoid.Health + 0.5) / 10
+					target = v.Name
+					if v.Team ~= lplr.Team and v ~= lplr then
+						local sword = getSword()
+						if sword ~= nil then
+							bedwars["SwordController"].lastAttack = game:GetService("Workspace"):GetServerTimeNow() - 0.11
+							HitRemote:SendToServer({
+								["weapon"] = sword.tool,
+								["entityInstance"] = v.Character,
+								["validate"] = {
+									["raycast"] = {
+										["cameraPosition"] = hashFunc(cam.CFrame.Position),
+										["cursorDirection"] = hashFunc(Ray.new(cam.CFrame.Position, v.Character:FindFirstChild("HumanoidRootPart").Position).Unit.Direction)
+									},
+									["targetPosition"] = hashFunc(v.Character:FindFirstChild("HumanoidRootPart").Position),
+									["selfPosition"] = hashFunc(lplr.Character:FindFirstChild("HumanoidRootPart").Position + ((lplr.Character:FindFirstChild("HumanoidRootPart").Position - v.Character:FindFirstChild("HumanoidRootPart").Position).magnitude > 14 and (CFrame.lookAt(lplr.Character:FindFirstChild("HumanoidRootPart").Position, v.Character:FindFirstChild("HumanoidRootPart").Position).LookVector * 4) or Vector3.new(0, 0, 0)))
 								},
-								["targetPosition"] = hashFunc(nearest.Character:FindFirstChild("HumanoidRootPart").Position),
-								["selfPosition"] = hashFunc(lplr.Character:FindFirstChild("HumanoidRootPart").Position + ((lplr.Character:FindFirstChild("HumanoidRootPart").Position - nearest.Character:FindFirstChild("HumanoidRootPart").Position).magnitude > 14 and (CFrame.lookAt(lplr.Character:FindFirstChild("HumanoidRootPart").Position, nearest.Character:FindFirstChild("HumanoidRootPart").Position).LookVector * 4) or Vector3.new(0, 0, 0)))
-							},
-							["chargedAttack"] = {["chargeRatio"] = 0.8}
-						})
+								["chargedAttack"] = {["chargeRatio"] = 0.8}
+							})
+						end
 					end
 				end
 				task.wait(0.12)
