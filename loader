@@ -2,6 +2,8 @@ local UIS = game:GetService("UserInputService")
 local btnCounts = {}
 local uiCount = 0
 
+local enabledTable = {}
+
 
 
 
@@ -59,7 +61,7 @@ end
 
 local windowapi  = {}
 
-windowapi ["CreateButton"] = function(tableData)
+windowapi["CreateButton"] = function(tableData)
 	btnCounts[tableData["Tab"]] += 1
 	val = 80
 	local btnAPI = {}
@@ -75,6 +77,7 @@ windowapi ["CreateButton"] = function(tableData)
 
 
 
+
 	btnAPI["ModuleEnabled"] = false
 	local TextButton = Instance.new("TextButton")
 	TextButton.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")[tableData["Tab"]].main
@@ -87,14 +90,28 @@ windowapi ["CreateButton"] = function(tableData)
 	TextButton.TextSize = 14.000
 	TextButton.TextWrapped = true
 	TextButton.Text = tableData["Name"]
+	local isEnabled = isfile(tableData["Name"]..".txt")
+	if isEnabled then
+		local function resume()
+			bind = readfile(tableData["Name"]..".txt")
+			TextButton.BackgroundColor3 = Color3.fromRGB(200, 0, 255)
+			btnAPI['ModuleEnabled'] = true
+			tableData["Function"](true)
+		end
+		coroutine.wrap(resume)()
+	end
 	TextButton.BorderSizePixel = 0
 	mouse.KeyDown:connect(function(key)
 		if key == bind then
 			if btnAPI['ModuleEnabled'] then
+				delfile(tableData["Name"]..".txt")
 				btnAPI['ModuleEnabled'] = false
 				tableData["Function"](false)
 				TextButton.BackgroundColor3 = Color3.fromRGB(52,52,52)
 			else
+				if not isEnabled then
+					writefile(tableData["Name"]..".txt",bind)
+				end
 				TextButton.BackgroundColor3 = Color3.fromRGB(200, 0, 255)
 				btnAPI['ModuleEnabled'] = true
 				tableData["Function"](true)
@@ -117,10 +134,14 @@ windowapi ["CreateButton"] = function(tableData)
 	end)
 	TextButton.MouseButton1Down:Connect(function()
 		if btnAPI['ModuleEnabled'] then
+			delfile(tableData["Name"]..".txt")
 			btnAPI['ModuleEnabled'] = false
 			tableData["Function"](false)
 			TextButton.BackgroundColor3 = Color3.fromRGB(0,0,0)
 		else
+			if not isEnabled then
+				writefile(tableData["Name"]..".txt",bind)
+			end
 			TextButton.BackgroundColor3 = Color3.fromRGB(200, 0, 255)
 			btnAPI['ModuleEnabled'] = true
 			tableData["Function"](true)
@@ -149,6 +170,10 @@ windowapi ["CreateButton"] = function(tableData)
 			bind = TextBox.Text
 			TextBox:Destroy()
 			ui:Destroy()
+			if isEnabled then
+				delfile(tableData["Name"]..".txt")
+				writefile(tableData["Name"]..".txt",bind)
+			end
 		end)
 	end)
 end
@@ -469,28 +494,33 @@ local Killaura = windowapi.CreateButton({
 			ui2.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 			target = nil
 			repeat
+				if not isalive(lplr) then
+					repeat wait() until isalive(lplr)
+				end
 				if nearestID ~= nil then
 				end
 				for _,v in pairs(game.Players:GetPlayers()) do
-					nearestID = v
-					target = v.Name
-					if v.Team ~= lplr.Team and v ~= lplr and isalive(v) and v.Character:FindFirstChild("HumanoidRootPart") and (v.Character.HumanoidRootPart.Position - lplr.Character.HumanoidRootPart.Position).Magnitude < 20 then
-						local sword = getSword()
-						if sword ~= nil then
-							bedwars["SwordController"].lastAttack = game:GetService("Workspace"):GetServerTimeNow() - 0.11
-							HitRemote:SendToServer({
-								["weapon"] = sword.tool,
-								["entityInstance"] = v.Character,
-								["validate"] = {
-									["raycast"] = {
-										["cameraPosition"] = hashFunc(cam.CFrame.Position),
-										["cursorDirection"] = hashFunc(Ray.new(cam.CFrame.Position, v.Character:FindFirstChild("HumanoidRootPart").Position).Unit.Direction)
+					if v ~= lplr then
+						nearestID = v
+						target = v.Name
+						if v.Team ~= lplr.Team and v ~= lplr and isalive(v) and v.Character:FindFirstChild("HumanoidRootPart") and (v.Character.HumanoidRootPart.Position - lplr.Character.HumanoidRootPart.Position).Magnitude < 20 then
+							local sword = getSword()
+							if sword ~= nil then
+								bedwars["SwordController"].lastAttack = game:GetService("Workspace"):GetServerTimeNow() - 0.11
+								HitRemote:SendToServer({
+									["weapon"] = sword.tool,
+									["entityInstance"] = v.Character,
+									["validate"] = {
+										["raycast"] = {
+											["cameraPosition"] = hashFunc(cam.CFrame.Position),
+											["cursorDirection"] = hashFunc(Ray.new(cam.CFrame.Position, v.Character:FindFirstChild("HumanoidRootPart").Position).Unit.Direction)
+										},
+										["targetPosition"] = hashFunc(v.Character:FindFirstChild("HumanoidRootPart").Position),
+										["selfPosition"] = hashFunc(lplr.Character:FindFirstChild("HumanoidRootPart").Position + ((lplr.Character:FindFirstChild("HumanoidRootPart").Position - v.Character:FindFirstChild("HumanoidRootPart").Position).magnitude > 14 and (CFrame.lookAt(lplr.Character:FindFirstChild("HumanoidRootPart").Position, v.Character:FindFirstChild("HumanoidRootPart").Position).LookVector * 4) or Vector3.new(0, 0, 0)))
 									},
-									["targetPosition"] = hashFunc(v.Character:FindFirstChild("HumanoidRootPart").Position),
-									["selfPosition"] = hashFunc(lplr.Character:FindFirstChild("HumanoidRootPart").Position + ((lplr.Character:FindFirstChild("HumanoidRootPart").Position - v.Character:FindFirstChild("HumanoidRootPart").Position).magnitude > 14 and (CFrame.lookAt(lplr.Character:FindFirstChild("HumanoidRootPart").Position, v.Character:FindFirstChild("HumanoidRootPart").Position).LookVector * 4) or Vector3.new(0, 0, 0)))
-								},
-								["chargedAttack"] = {["chargeRatio"] = 0.8}
-							})
+									["chargedAttack"] = {["chargeRatio"] = 0.8}
+								})
+							end
 						end
 					end
 				end
@@ -646,7 +676,7 @@ local flytime = 2.6
 local inverse = false
 local status
 Flight = windowapi.CreateButton({
-	["Name"] = "Flight | New Fly Timer",
+	["Name"] = "Flight",
 	["Tab"] = "Movement",
 	["Function"] = function(callback)
 		local currentvelo = lplr.Character.HumanoidRootPart.Velocity.Y
