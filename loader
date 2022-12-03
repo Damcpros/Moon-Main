@@ -467,19 +467,6 @@ local Killaura = windowapi.CreateButton({
 			local ui2 = Instance.new("ScreenGui")
 			local nearestID = nil
 			ui2.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-			timer2 = Instance.new("TextLabel")
-			timer2.Parent = ui2
-			timer2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-			timer2.BackgroundTransparency = 0.8
-			timer2.Position = UDim2.new(0.499694198, 0, 0.486585349, 0)
-			timer2.Size = UDim2.new(0, 100, 0, 70)
-			timer2.Font = Enum.Font.SourceSans
-			timer2.Text = ""
-			timer2.TextScaled = true
-			timer2.TextSize = 25.000
-			timer2.TextWrapped = true
-			timer2.TextColor3 = Color3.fromRGB(13, 255, 0)
-			timer2.TextScaled = true
 			target = nil
 			repeat
 				if nearestID ~= nil then
@@ -489,9 +476,6 @@ local Killaura = windowapi.CreateButton({
 				end
 				local nearest = getnearestplayer(Distance["Value"])
 				nearestID = nearest
-				if nearest == nil then
-					timer2.Text = " "
-				end
 				local targetHP = math.floor(nearest.Character.Humanoid.Health + 0.5) / 10
 				timer2.Text = "Target Health : "..targetHP
 				target = nearest.Name
@@ -512,9 +496,6 @@ local Killaura = windowapi.CreateButton({
 							},
 							["chargedAttack"] = {["chargeRatio"] = 0.8}
 						})
-					end
-					if not isalive(nearest) or target ~= nearest or nearest == nil or not isalive(lplr) then
-						timer2.Text = ""
 					end
 				end
 				task.wait(0.12)
