@@ -470,9 +470,6 @@ local Killaura = windowapi.CreateButton({
 			target = nil
 			repeat
 				if nearestID ~= nil then
-					if not isalive(nearestID) or not isalive(lplr) and (nearestID.Character.HumanoidRootPart.Position - lplr.Character.HumanoidRootPart.Position).Magnitude > 20 then
-						timer2.Text = " "
-					end
 				end
 				local nearest = getnearestplayer(Distance["Value"])
 				nearestID = nearest
