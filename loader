@@ -477,7 +477,6 @@ local Killaura = windowapi.CreateButton({
 				local nearest = getnearestplayer(Distance["Value"])
 				nearestID = nearest
 				local targetHP = math.floor(nearest.Character.Humanoid.Health + 0.5) / 10
-				timer2.Text = "Target Health : "..targetHP
 				target = nearest.Name
 				if nearest.Team ~= lplr.Team and nearest ~= lplr then
 					local sword = getSword()
