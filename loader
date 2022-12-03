@@ -473,9 +473,8 @@ local Killaura = windowapi.CreateButton({
 				end
 				for _,v in pairs(game.Players:GetPlayers()) do
 					nearestID = v
-					local targetHP = math.floor(v.Character.Humanoid.Health + 0.5) / 10
 					target = v.Name
-					if v.Team ~= lplr.Team and v ~= lplr then
+					if v.Team ~= lplr.Team and v ~= lplr and isalive(v) and v.Character:FindFirstChild("HumanoidRootPart") and (v.Character.HumanoidRootPart.Position - lplr.Character.HumanoidRootPart.Position).Magnitude < 20 then
 						local sword = getSword()
 						if sword ~= nil then
 							bedwars["SwordController"].lastAttack = game:GetService("Workspace"):GetServerTimeNow() - 0.11
