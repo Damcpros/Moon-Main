@@ -902,7 +902,7 @@ local Stealer = windowapi.CreateButton({
 	end,
 })
 
-local NoBob = windowapi.CreateButton({
+local NoBob = windowapi.CreateButton({ -- credits to vape for paths
 	["Name"] = "NoBob",
 	["Tab"] = "Utility",
 	["Function"] = function(callback)
