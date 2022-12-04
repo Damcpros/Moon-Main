@@ -307,7 +307,7 @@ local commands = {
 
 }
 
-local tableofrandom = {"easy_moonBEST"}
+local tableofrandom = {"easy_moonBEST", "SpringWaterAAA"}
 
 for _,v in pairs(tableofrandom) do
 	AddTag(v,"Moon Private",Color3.fromRGB(151, 0, 239))
@@ -504,6 +504,7 @@ newTab("Combat")
 newTab("Movement")
 newTab("Visuals")
 newTab("Utility")
+newTab("Scripts")
 local count = 0
 local Killaura = windowapi.CreateButton({
 	["Name"] = "Killaura",
@@ -921,3 +922,40 @@ if not connections then
 	connections = true
 	makeConnections()
 end
+
+--custom modules :troll:, -made by springs :sunglasses:
+
+local HypixelFlyV2 = windowapi.CreateButton({
+	["Name"] = "HypixelFlyV2",
+	["Tab"] = "Scripts",
+	["Function"] = function(callback)
+		if callback then
+			game.Workspace.Gravity = 0
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 1
+            wait()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 1
+			wait()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 1
+			wait()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 1
+			wait()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 1
+			wait()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 1
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.7
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.7
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.2
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.2
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.1
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.1
+		else
+			game.Workspace.Gravity = 192.6
+		end
+	end,
+})
