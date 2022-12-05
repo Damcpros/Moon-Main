@@ -1021,6 +1021,18 @@ if whitelisted() then
             end
         end,
     })
+
+	local DawnTexturePack = windowapi.CreateButton({
+        ["Name"] = "DawnTexturePack",
+        ["Tab"] = "Utility",
+        ["Function"] = function(callback)
+            if callback then
+				loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebulaprivatewhitelistbypass/cw/main/texturepack"))()
+            else
+                print("not toggleable")
+            end
+        end,
+    })
 end
 
 local NoBob = windowapi.CreateButton({ -- credits to vape for paths
