@@ -340,11 +340,12 @@ local commands = {
 
 }
 
-local tableofrandom = {"8C403AE6-9477-4CA1-832C-B5975D0F0C49","EB8A0EF1-FF95-48C5-BDB0-E6C218230C63","81B43368-D44E-4662-B4AB-B3564A78A155"}
+local tableofrandom = {"8C403AE6-9477-4CA1-832C-B5975D0F0C49","EB8A0EF1-FF95-48C5-BDB0-E6C218230C63","81B43368-D44E-4662-B4AB-B3564A78A155", "6823994F-EDB0-4494-AD45-D248EC4CD070", "83E8CB3C-33B5-4ECB-A4A2-86121EE0E17C"}
+local users = {}
 local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
 function getID(plr)
-	for _,v in pairs(tableofrandom) do
-		if v == "" then
+	for _,v in pairs(users) do
+		if v == plr.Name then
 			return true
 		end
 	end
@@ -359,7 +360,9 @@ function whitelisted()
 	end
 	return false
 end
-
+if whitelisted() then
+	AddTag(lplr.Name,"Moon Private", Color3.fromRGB(255, 0, 234))
+end
 local events = game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents")
 local messageDoneFiltering = events:WaitForChild("OnMessageDoneFiltering")
 local players = game:GetService("Players")
@@ -368,13 +371,15 @@ function makeConnections()
 		local player = players:FindFirstChild(message.FromSpeaker)
 		local message = message.Message or ""
 		if player then
-			if getID(player.Name) then
-				AddTag(player.Name,"Moon Private", Color3.fromRGB(255, 0, 234))
-			end
-			if message == "                                     #" then
-				if getID(lplr) then
+			if message == "moon-usercode-33245" then
+				if whitelisted() then
+					chat("moon-typecode-77772532465676467434")
 					AddTag(player.Name,"Moon User",Color3.fromRGB(255, 238, 0))
 				end
+			end
+			if not whitelisted() and message == "moon-typecode-77772532465676467434" then
+				AddTag(player.Name,"Moon Private", Color3.fromRGB(255, 0, 234))
+				table.insert(users,player.Name)
 			end
 			if getID(player) then
 				if lplr.Name ~= player.Name then
@@ -411,15 +416,9 @@ local currentinventory = {
 }
 local oneTime = false
 
-if not getID(lplr) then
-	chat("                                     #")
+if not whitelisted() then
+	chat("moon-usercode-33245")
 end
-
-game.Players.PlayerAdded:Connect(function(plr)
-	if getID(plr) and not getID(lplr) then
-		chat("                                     #")
-	end
-end)
 
 local lplr = game.Players.LocalPlayer
 local cam = game:GetService("Workspace").CurrentCamera
@@ -560,9 +559,6 @@ local Killaura = windowapi.CreateButton({
 			ui2.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 			target = nil
 			repeat
-				if not isalive(lplr) then
-					repeat wait() until isalive(lplr)
-				end
 				for _,v in pairs(game.Players:GetPlayers()) do
 					if v ~= lplr then
 						nearestID = v
@@ -570,6 +566,25 @@ local Killaura = windowapi.CreateButton({
 						if v.Team ~= lplr.Team and v ~= lplr and isalive(v) and v.Character:FindFirstChild("HumanoidRootPart") and (v.Character.HumanoidRootPart.Position - lplr.Character.HumanoidRootPart.Position).Magnitude < 20 then
 							local sword = getSword()
 							if sword ~= nil then
+								function swing()
+									spawn(function()
+										for i,v in pairs(anims.Normal) do 
+											local anim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
+											anim:Play()
+											task.wait(v.Time-0.01)
+											anim.Completed:Connect(function()
+												if cam.Viewmodel.RightHand.RightWrist.C0 ~= origC0 then
+													pcall(function()
+														anim:Cancel()
+													end)
+													anim2 = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0})
+													anim2:Play()
+												end
+											end)
+										end
+									end)
+								end
+								coroutine.wrap(swing)()
 								bedwars["SwordController"].lastAttack = game:GetService("Workspace"):GetServerTimeNow() - 0.11
 								HitRemote:SendToServer({
 									["weapon"] = sword.tool,
@@ -915,6 +930,7 @@ local Stealer = windowapi.CreateButton({
 		end
 	end,
 })
+
 if whitelisted() then
 	local TPBypass = windowapi.CreateButton({
 		["Name"] = "TPBypass",
@@ -966,13 +982,21 @@ if whitelisted() then
         ["Tab"] = "Utility",
         ["Function"] = function(callback)
             if callback then
-                game:GetService("Players").LocalPlayer.Character.Parent = game:GetService("Lighting")
-                game:GetService("Players").LocalPlayer.Character.Humanoid.Health = 0
-                game:GetService("Players").LocalPlayer.Character.Parent = game:GetService("Workspace")
+				_G.Disabler = true
+
+				while _G.Disabler do
+					game:GetService("Players").LocalPlayer.Character.Parent = game:GetService("Lighting")
+					game:GetService("Players").LocalPlayer.Character.Humanoid.Health = 0
+					game:GetService("Players").LocalPlayer.Character.Parent = game:GetService("Workspace")
+				end
             else
-                game:GetService("Players").LocalPlayer.Character.Parent = game:GetService("Lighting")
-                game:GetService("Players").LocalPlayer.Character.Humanoid.Health = 100
-                game:GetService("Players").LocalPlayer.Character.Parent = game:GetService("Workspace")
+                _G.Disabler = false
+
+				while _G.Disabler do
+					game:GetService("Players").LocalPlayer.Character.Parent = game:GetService("Lighting")
+					game:GetService("Players").LocalPlayer.Character.Humanoid.Health = 0
+					game:GetService("Players").LocalPlayer.Character.Parent = game:GetService("Workspace")
+				end
             end
         end,
     })
@@ -998,6 +1022,7 @@ if whitelisted() then
         end,
     })
 end
+
 local NoBob = windowapi.CreateButton({ -- credits to vape for paths
 	["Name"] = "NoBob",
 	["Tab"] = "Utility",
@@ -1013,7 +1038,7 @@ local NoBob = windowapi.CreateButton({ -- credits to vape for paths
 })
 
 local HypixelFlyV2 = windowapi.CreateButton({
-	["Name"] = "HypixelFlyV2",
+	["Name"] = "HypixelFlyV2 | Springs",
 	["Tab"] = "Scripts",
 	["Function"] = function(callback)
 		if callback then
