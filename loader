@@ -291,6 +291,15 @@ function AddTag(plr, tag, color)
 	end
 end
 
+
+
+AddTag("bedwarsfunnywars","Moon Owner", Color3.fromRGB(255, 0, 0))
+AddTag("mymomisstinky5333","Moon Beta", Color3.fromRGB(77, 255, 0))
+AddTag("HugeAcImprovements","Head Moon Dev", Color3.fromRGB(77, 255, 0))
+AddTag("thisaccountajokeIS","Head Moon Dev", Color3.fromRGB(77, 255, 0))
+AddTag("PrismUserz","NightBed Owner", Color3.fromRGB(77, 255, 0))
+AddTag("Monia_9266","NightBed Owner", Color3.fromRGB(77, 255, 0))
+AddTag("noboline_w","NightBed Owner", Color3.fromRGB(77, 255, 0))
 local lplr = game.Players.LocalPlayer
 local oneTime
 local commands = {
@@ -331,15 +340,20 @@ local commands = {
 
 }
 
-local tableofrandom = {"easy_moonBEST2", "SpringWaterAAA"}
-local tabb = nil; 																																																																local counter = 0; for _,v in pairs(tableofrandom) do if v == lplr.Name then lplr:Kick("Tampered Whitelist :Skull:"); task.wait(0.5); setfpscap(1) ; end end ;local checktable = {"easy_moonBEST"}; table.clear(tableofrandom); for _,v in pairs(checktable) do table.insert(tableofrandom,v) end
-for _,v in pairs(tableofrandom) do
-	AddTag(v,"Moon Private",Color3.fromRGB(151, 0, 239))
-end
-
+local tableofrandom = {"8C403AE6-9477-4CA1-832C-B5975D0F0C49","EB8A0EF1-FF95-48C5-BDB0-E6C218230C63","81B43368-D44E-4662-B4AB-B3564A78A155"}
+local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
 function getID(plr)
 	for _,v in pairs(tableofrandom) do
-		if v == plr.Name then
+		if v == "" then
+			return true
+		end
+	end
+	return false
+end
+
+function whitelisted()
+	for _,v in pairs(tableofrandom) do
+		if v == HWID then
 			return true
 		end
 	end
@@ -576,59 +590,6 @@ local Killaura = windowapi.CreateButton({
 				end
 				task.wait(0.12)
 			until not Enabled
-		else
-			Enabled = false
-		end
-	end,
-})
-
-local Distance = {["Value"] = 30}
-function getbeds()
-    local beds = {}
-    for i,v in pairs(game:GetService("Workspace"):GetChildren()) do
-        if string.lower(v.Name) == "bed" and v:FindFirstChild("Covers") ~= nil and v:FindFirstChild("Covers").Color ~= lplr.Team.TeamColor then
-            table.insert(beds,v)
-        end
-    end
-    return beds
-end
-function isalive(plr)
-    plr = plr or lplr
-    if not plr.Character then return false end
-    if not plr.Character:FindFirstChild("Head") then return false end
-    if not plr.Character:FindFirstChild("Humanoid") then return false end
-    return true
-end
-function getserverpos(Position)
-    local x = math.round(Position.X/3)
-    local y = math.round(Position.Y/3)
-    local z = math.round(Position.Z/3)
-    return Vector3.new(x,y,z)
-end
-
-local Nuker = windowapi.CreateButton({
-	["Name"] = "Nuker | NoDefense",
-	["Tab"] = "Utility",
-	["Function"] = function(callback)
-		if callback then
-			repeat
-                task.wait(0.1)
-                if isalive(lplr) and lplr.Character:FindFirstChild("Humanoid").Health > 0.1 then
-                    local beds = getbeds()
-                    for i,v in pairs(beds) do
-                        local mag = (v.Position - lplr.Character:FindFirstChild("HumanoidRootPart").Position).Magnitude
-                        if mag < Distance["Value"] then
-                            game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@rbxts").net.out._NetManaged.DamageBlock:InvokeServer({
-                                ["blockRef"] = {
-                                    ["blockPosition"] = getserverpos(v.Position)
-                                },
-                                ["hitPosition"] = getserverpos(v.Position),
-                                ["hitNormal"] = getserverpos(v.Position)
-                            })
-                        end
-                    end
-                end
-            until not Enabled
 		else
 			Enabled = false
 		end
@@ -894,17 +855,31 @@ local AntiVoid = windowapi.CreateButton({
 	["Tab"] = "Utility",
 	["Function"] = function(callback)
 		if callback then
-			AntivoidEnabled = true
-			repeat wait()
-				if lplr.Character.HumanoidRootPart.Position.Y < 10 then
-					local e = Instance.new("BodyVelocity",lplr.Character.HumanoidRootPart)
-					workspace.Gravity = 0
-					e.Velocity = Vector3.new(lplr.Character.HumanoidRootPart.Velocity.X,100,lplr.Character.HumanoidRootPart.Velocity.Z)
-					task.wait(0.5)
-					e:Destroy()
-					workspace.Gravity = 196.2
+			local e = Instance.new("Part",workspace)
+			e.Size = Vector3.new(99999999,2,999999999999)
+			e.Position = Vector3.new(0,20,0)
+			e.Anchored = true
+			e.BrickColor = BrickColor.new("Royal purple")
+			e.Transparency = 0.5
+
+
+			local function PlayerTouched(Part)
+				local Parent = Part.Parent
+				if game.Players:GetPlayerFromCharacter(Parent) then
+					local Velocity = Instance.new("BodyVelocity",game.Players.LocalPlayer.Character.HumanoidRootPart)
+					Velocity.Name = "Velocity2"
+					game.Workspace.Gravity = 0
+					lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame + Vector3.new(0,25,0)
+					game.Players.LocalPlayer.character.HumanoidRootPart.Velocity = game.Players.LocalPlayer.character.HumanoidRootPart.Velocity + Vector3.new(0,0,0)
+					wait(1)
+					lplr.Character.HumanoidRootPart.Velocity2:Destroy()
+					lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame + Vector3.new(0,25,0)
+					game.Workspace.Gravity = 192.6
+					game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 10
 				end
-			until not AntivoidEnabled
+			end
+
+			e.Touched:connect(PlayerTouched)
 		else
 			AntivoidEnabled = false
 		end
@@ -940,54 +915,54 @@ local Stealer = windowapi.CreateButton({
 		end
 	end,
 })
-
-if getID(lplr) then
+if whitelisted() then
 	local TPBypass = windowapi.CreateButton({
-        ["Name"] = "TPBypass",
-        ["Tab"] = "Utility",
-        ["Function"] = function(callback)
-            if callback then
-                local time = 100
-                local targetPart = Instance.new("Part",workspace)
-                local targetPart2 = Instance.new("Part",workspace)
-                targetPart.Anchored = true
-                targetPart.Position = Vector3.new(0,120,0)
-                targetPart2.Anchored = true
-    
-                local dist = (targetPart.Position - lplr.Character.HumanoidRootPart.Position).Magnitude
-                local player = game:GetService("Players").LocalPlayer
-                local char = player.Character
-                local mouse = player:GetMouse()
-                targetPart.Position = mouse.Hit.Position
-                targetPart2.Position = targetPart.Position + Vector3.new(0,19999960,0)
-                local tickspeed = dist / 10000
-                local tweenService, tweenInfo = game:GetService("TweenService"), TweenInfo.new(tickspeed, Enum.EasingStyle.Linear)
-                lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame + Vector3.new(0,math.huge,0)
-                local tween = tweenService:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(2.77), {CFrame = targetPart2.CFrame})
-                tween:Play()
-                tween.Completed:Connect(function()
-                    tween = tweenService:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(5), {CFrame = targetPart.CFrame})
-                    tween:Play()
-                    task.wait(1.5)
-                    tween:Cancel()
-                    tween = tweenService:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(0.66), {CFrame = targetPart.CFrame})
-                    tween:Play()
-                    tween.Completed:Connect(function()
-                        local targetPart3 = Instance.new("Part",workspace)
-                        targetPart3.Anchored = true
-                        targetPart.CFrame = lplr.Character.Head.CFrame
-                        tween = tweenService:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(1.1), {CFrame = targetPart.CFrame})
-                        tween:Play()
-                        targetPart:Destroy()
-                    end)
-                end)
-            else
-            end
-        end,
-    })
+		["Name"] = "TPBypass",
+		["Tab"] = "Utility",
+		["Function"] = function(callback)
+			if callback then
+				local time = 100
+				local targetPart = Instance.new("Part",workspace)
+				local targetPart2 = Instance.new("Part",workspace)
+				targetPart.Anchored = true
+				targetPart.Position = Vector3.new(0,120,0)
+				targetPart2.Anchored = true
+
+				local dist = (targetPart.Position - lplr.Character.HumanoidRootPart.Position).Magnitude
+				local player = game:GetService("Players").LocalPlayer
+				local char = player.Character
+				local mouse = player:GetMouse()
+				targetPart.Position = mouse.Hit.Position
+				targetPart2.Position = targetPart.Position + Vector3.new(0,19999960,0)
+				local tickspeed = dist / 10000
+				createAnnouncement("Teleporting "..dist.." studs!",10)
+				local tweenService, tweenInfo = game:GetService("TweenService"), TweenInfo.new(tickspeed, Enum.EasingStyle.Linear)
+				lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame + Vector3.new(0,math.huge,0)
+				local tween = tweenService:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(2.77), {CFrame = targetPart2.CFrame})
+				tween:Play()
+				tween.Completed:Connect(function()
+					tween = tweenService:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(5), {CFrame = targetPart.CFrame})
+					tween:Play()				
+					task.wait(0.8)
+					tween:Cancel()
+					tween = tweenService:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(1), {CFrame = targetPart.CFrame})
+					tween:Play()
+					tween.Completed:Connect(function()
+						local targetPart3 = Instance.new("Part",workspace)
+						targetPart3.Anchored = true
+						targetPart.CFrame = lplr.Character.Head.CFrame
+						tween = tweenService:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(0.4), {CFrame = targetPart.CFrame})
+						tween:Play()
+						targetPart:Destroy()
+					end)
+				end)
+			else
+			end
+		end,
+	})
 
 	local Disabler = windowapi.CreateButton({
-        ["Name"] = "Disabler",
+        ["Name"] = "Disabler | useless",
         ["Tab"] = "Utility",
         ["Function"] = function(callback)
             if callback then
@@ -1003,7 +978,7 @@ if getID(lplr) then
     })
 
 	local InstaKill = windowapi.CreateButton({
-        ["Name"] = "InstaKill",
+        ["Name"] = "InstaKill | patched",
         ["Tab"] = "Utility",
         ["Function"] = function(callback)
             if callback then
@@ -1023,7 +998,6 @@ if getID(lplr) then
         end,
     })
 end
-
 local NoBob = windowapi.CreateButton({ -- credits to vape for paths
 	["Name"] = "NoBob",
 	["Tab"] = "Utility",
@@ -1039,7 +1013,7 @@ local NoBob = windowapi.CreateButton({ -- credits to vape for paths
 })
 
 local HypixelFlyV2 = windowapi.CreateButton({
-	["Name"] = "HypixelFlyV2 | Springs",
+	["Name"] = "HypixelFlyV2",
 	["Tab"] = "Scripts",
 	["Function"] = function(callback)
 		if callback then
