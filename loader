@@ -16,7 +16,7 @@ local moduleCount = 0
 local installed = isfile("MoonScripts")
 if not installed then
 	makefolder("MoonScripts")
-	writefule("MoonScripts/script.txt","Please copy the scripting API from the discord server.")
+	writefile("MoonScripts/script.txt","Please copy the scripting API from the discord server.")
 end
 
 function createAnnouncement(text,time)
