@@ -1,9 +1,12 @@
 local UIS = game:GetService("UserInputService")
 local btnCounts = {}
 local uiCount = 0
+local moduleCount = 0
 
-local enabledTable = {}
-
+local installed = isfile("MoonScripts")
+if not installed then
+	makefolder("MoonScripts")
+end
 
 function createAnnouncement(text,time)
 	local function create()
@@ -131,7 +134,7 @@ windowapi["CreateButton"] = function(tableData)
 			btnAPI['ModuleEnabled'] = true
 			tableData["Function"](true)
 		end
-		if tableData["Name"] ~= "Flight" then
+		if tableData["Name"] ~= "Flight" or tableData["Name"] ~= "TP" then
 			coroutine.wrap(resume)()
 		end
 	end
@@ -340,7 +343,7 @@ local commands = {
 
 }
 
-local tableofrandom = {"8C403AE6-9477-4CA1-832C-B5975D0F0C49","EB8A0EF1-FF95-48C5-BDB0-E6C218230C63","81B43368-D44E-4662-B4AB-B3564A78A155", "6823994F-EDB0-4494-AD45-D248EC4CD070", "83E8CB3C-33B5-4ECB-A4A2-86121EE0E17C"}
+local tableofrandom = {"8C403AE6-9477-4CA1-832C-B5975D0F0C49","EB8A0EF1-FF95-48C5-BDB0-E6C218230C63","81B43368-D44E-4662-B4AB-B3564A78A155"}
 local users = {}
 local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
 function getID(plr)
@@ -549,8 +552,8 @@ local Killaura = windowapi.CreateButton({
 		if callback then
 			local anims = {
 				Normal = {
-					{CFrame = CFrame.new(1, -1, 2) * CFrame.Angles(math.rad(295), math.rad(55), math.rad(290)), Time = 0.25},
-					{CFrame = CFrame.new(-1, 1, -2.2) * CFrame.Angles(math.rad(200), math.rad(60), math.rad(1)), Time = 0.25}
+					{CFrame = CFrame.new(1, -1, 2) * CFrame.Angles(math.rad(295), math.rad(55), math.rad(290)), Time = 0.3},
+					{CFrame = CFrame.new(-1, 1, -2.2) * CFrame.Angles(math.rad(200), math.rad(60), math.rad(1)), Time = 0.3}
 				},
 			}
 			local origC0 = cam.Viewmodel.RightHand.RightWrist.C0
@@ -568,20 +571,13 @@ local Killaura = windowapi.CreateButton({
 							if sword ~= nil then
 								function swing()
 									spawn(function()
-										for i,v in pairs(anims.Normal) do 
-											local anim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
-											anim:Play()
-											task.wait(v.Time-0.01)
-											anim.Completed:Connect(function()
-												if cam.Viewmodel.RightHand.RightWrist.C0 ~= origC0 then
-													pcall(function()
-														anim:Cancel()
-													end)
-													anim2 = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0})
-													anim2:Play()
-												end
-											end)
-										end
+										pcall(function()
+											for i,v in pairs(anims.Normal) do 
+												anim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
+												anim:Play()
+												task.wait(v.Time)
+											end
+										end)
 									end)
 								end
 								coroutine.wrap(swing)()
@@ -604,6 +600,16 @@ local Killaura = windowapi.CreateButton({
 					end
 				end
 				task.wait(0.12)
+				local function redo()
+					if cam.Viewmodel.RightHand.RightWrist.C0 ~= origC0 then
+						pcall(function()
+							anim:Cancel()
+						end)
+						anim2 = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(0.364), {C0 = origC0})
+						anim2:Play()
+					end
+				end
+				coroutine.wrap(redo)()
 			until not Enabled
 		else
 			Enabled = false
@@ -870,31 +876,17 @@ local AntiVoid = windowapi.CreateButton({
 	["Tab"] = "Utility",
 	["Function"] = function(callback)
 		if callback then
-			local e = Instance.new("Part",workspace)
-			e.Size = Vector3.new(99999999,2,999999999999)
-			e.Position = Vector3.new(0,20,0)
-			e.Anchored = true
-			e.BrickColor = BrickColor.new("Royal purple")
-			e.Transparency = 0.5
-
-
-			local function PlayerTouched(Part)
-				local Parent = Part.Parent
-				if game.Players:GetPlayerFromCharacter(Parent) then
-					local Velocity = Instance.new("BodyVelocity",game.Players.LocalPlayer.Character.HumanoidRootPart)
-					Velocity.Name = "Velocity2"
-					game.Workspace.Gravity = 0
-					lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame + Vector3.new(0,25,0)
-					game.Players.LocalPlayer.character.HumanoidRootPart.Velocity = game.Players.LocalPlayer.character.HumanoidRootPart.Velocity + Vector3.new(0,0,0)
-					wait(1)
-					lplr.Character.HumanoidRootPart.Velocity2:Destroy()
-					lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame + Vector3.new(0,25,0)
-					game.Workspace.Gravity = 192.6
-					game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 10
+			AntivoidEnabled = true
+			repeat wait()
+				if lplr.Character.HumanoidRootPart.Position.Y < 10 then
+					local e = Instance.new("BodyVelocity",lplr.Character.HumanoidRootPart)
+					workspace.Gravity = 0
+					e.Velocity = Vector3.new(lplr.Character.HumanoidRootPart.Velocity.X,100,lplr.Character.HumanoidRootPart.Velocity.Z)
+					task.wait(0.5)
+					e:Destroy()
+					workspace.Gravity = 196.2
 				end
-			end
-
-			e.Touched:connect(PlayerTouched)
+			until not AntivoidEnabled
 		else
 			AntivoidEnabled = false
 		end
@@ -930,110 +922,6 @@ local Stealer = windowapi.CreateButton({
 		end
 	end,
 })
-
-if whitelisted() then
-	local TPBypass = windowapi.CreateButton({
-		["Name"] = "TPBypass",
-		["Tab"] = "Utility",
-		["Function"] = function(callback)
-			if callback then
-				local time = 100
-				local targetPart = Instance.new("Part",workspace)
-				local targetPart2 = Instance.new("Part",workspace)
-				targetPart.Anchored = true
-				targetPart.Position = Vector3.new(0,120,0)
-				targetPart2.Anchored = true
-
-				local dist = (targetPart.Position - lplr.Character.HumanoidRootPart.Position).Magnitude
-				local player = game:GetService("Players").LocalPlayer
-				local char = player.Character
-				local mouse = player:GetMouse()
-				targetPart.Position = mouse.Hit.Position
-				targetPart2.Position = targetPart.Position + Vector3.new(0,19999960,0)
-				local tickspeed = dist / 10000
-				createAnnouncement("Teleporting "..dist.." studs!",10)
-				local tweenService, tweenInfo = game:GetService("TweenService"), TweenInfo.new(tickspeed, Enum.EasingStyle.Linear)
-				lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame + Vector3.new(0,math.huge,0)
-				local tween = tweenService:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(2.77), {CFrame = targetPart2.CFrame})
-				tween:Play()
-				tween.Completed:Connect(function()
-					tween = tweenService:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(5), {CFrame = targetPart.CFrame})
-					tween:Play()				
-					task.wait(0.8)
-					tween:Cancel()
-					tween = tweenService:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(1), {CFrame = targetPart.CFrame})
-					tween:Play()
-					tween.Completed:Connect(function()
-						local targetPart3 = Instance.new("Part",workspace)
-						targetPart3.Anchored = true
-						targetPart.CFrame = lplr.Character.Head.CFrame
-						tween = tweenService:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(0.4), {CFrame = targetPart.CFrame})
-						tween:Play()
-						targetPart:Destroy()
-					end)
-				end)
-			else
-			end
-		end,
-	})
-
-	local Disabler = windowapi.CreateButton({
-        ["Name"] = "Disabler | useless",
-        ["Tab"] = "Utility",
-        ["Function"] = function(callback)
-            if callback then
-				_G.Disabler = true
-
-				while _G.Disabler do
-					game:GetService("Players").LocalPlayer.Character.Parent = game:GetService("Lighting")
-					game:GetService("Players").LocalPlayer.Character.Humanoid.Health = 0
-					game:GetService("Players").LocalPlayer.Character.Parent = game:GetService("Workspace")
-				end
-            else
-                _G.Disabler = false
-
-				while _G.Disabler do
-					game:GetService("Players").LocalPlayer.Character.Parent = game:GetService("Lighting")
-					game:GetService("Players").LocalPlayer.Character.Humanoid.Health = 0
-					game:GetService("Players").LocalPlayer.Character.Parent = game:GetService("Workspace")
-				end
-            end
-        end,
-    })
-
-	local InstaKill = windowapi.CreateButton({
-        ["Name"] = "InstaKill | patched",
-        ["Tab"] = "Utility",
-        ["Function"] = function(callback)
-            if callback then
-                while true do wait()
-                    local args = {
-                        [1] = {
-                            ["swordType"] = "juggernaut_rage_blade",
-                            ["player"] = game:GetService("Players").LocalPlayer
-                        }
-                    }
-                    
-                    game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@rbxts").net.out._NetManaged.bswjzfrdqOxmKwqogHntzjb:FireServer(unpack(args))
-                end
-            else
-                print("patched XD")
-            end
-        end,
-    })
-
-	local DawnTexturePack = windowapi.CreateButton({
-        ["Name"] = "DawnTexturePack",
-        ["Tab"] = "Utility",
-        ["Function"] = function(callback)
-            if callback then
-				loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebulaprivatewhitelistbypass/cw/main/texturepack"))()
-            else
-                print("not toggleable")
-            end
-        end,
-    })
-end
 
 local NoBob = windowapi.CreateButton({ -- credits to vape for paths
 	["Name"] = "NoBob",
@@ -1086,6 +974,12 @@ local HypixelFlyV2 = windowapi.CreateButton({
 
 
 if not connections then
+	if isfile("MoonScripts/script.txt") then
+		runner = loadfile("MoonScripts/script.txt")
+	end
+	if runner ~= nil then
+		runner()
+	end
 	connections = true
 	makeConnections()
 end
