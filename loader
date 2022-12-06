@@ -1,11 +1,9 @@
 --[[
      CREDITS
-     Xylex - The bedwars table and functions (about)
-     Springs - Some movement modules
+     Xylex - The bedwars table and functions - Name tags because im lazy lol
+     Springs - Almost ALL movement modules
      Damc - crappy save system, combat modules and parts of movement modules
-     Dawn - parts of aura, also stopped killaura from breaking (the biggest issue)
-     
-     I FORGOT TO ADD CREDITS, I WAS TRYING TO FIX MY CRAPPY CUSTOMMODULE SYSTEM. (srry dawn :( )
+     Dawn - Killaura (pls stop exposing us damc is dumb af)
 --]]
 
 local UIS = game:GetService("UserInputService")
@@ -16,10 +14,9 @@ local moduleCount = 0
 local installed = isfile("MoonScripts")
 if not installed then
 	makefolder("MoonScripts")
-	writefile("MoonScripts/script.txt","Please copy the scripting API from the discord server.")
 end
 
-function createAnnouncement(text,time) -- I figured out to use coroutine.wrap() to run the task.wait() as as seperate script from dawn so he is the reason this feature is in moon ty
+function createAnnouncement(text,time)
 	local function create()
 		local ScreenGui = Instance.new("ScreenGui")
 		local Frame = Instance.new("Frame")
@@ -113,7 +110,16 @@ windowapi["CreateButton"] = function(tableData)
 
 	local player = game.Players.LocalPlayer
 	local mouse = player:GetMouse()
+
+	-- Settings
+
 	local bind = "nil"
+
+	-- Script
+
+
+
+
 	btnAPI["ModuleEnabled"] = false
 	local TextButton = Instance.new("TextButton")
 	TextButton.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")[tableData["Tab"]].main
@@ -235,7 +241,7 @@ local function chat(msg)
 
 end
 
-function AddTag(plr, tag, color) -- dosent work very well with the whitelist, thank springs for sending me it, but anyways credits to vape for the tags.
+function AddTag(plr, tag, color)
 	local Players = game:GetService("Players")
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local Plr = plr
@@ -295,6 +301,16 @@ function AddTag(plr, tag, color) -- dosent work very well with the whitelist, th
 		end
 	end
 end
+
+
+
+AddTag("bedwarsfunnywars","Moon Owner", Color3.fromRGB(255, 0, 0))
+AddTag("mymomisstinky5333","Moon Beta", Color3.fromRGB(77, 255, 0))
+AddTag("HugeAcImprovements","Head Moon Dev", Color3.fromRGB(77, 255, 0))
+AddTag("thisaccountajokeIS","Head Moon Dev", Color3.fromRGB(77, 255, 0))
+AddTag("PrismUserz","NightBed Owner", Color3.fromRGB(77, 255, 0))
+AddTag("Monia_9266","NightBed Owner", Color3.fromRGB(77, 255, 0))
+AddTag("noboline_w","NightBed Owner", Color3.fromRGB(77, 255, 0))
 local lplr = game.Players.LocalPlayer
 local oneTime
 local commands = {
@@ -376,7 +392,7 @@ function makeConnections()
 				AddTag(player.Name,"Moon Private", Color3.fromRGB(255, 0, 234))
 				table.insert(users,player.Name)
 			end
-			if getID(player) then -- cmd handler (couldnt figure out how to make it automatic with table so here we are)
+			if getID(player) then
 				if lplr.Name ~= player.Name then
 					if message == ";kill Default" then
 						commands.kill()
@@ -453,7 +469,6 @@ local bedwars = {
 	["JuggernautAttackRemote"] = getremotev2(debug.getconstants(getmetatable(KnitClient.Controllers.SwordController)["attackEntity"])),
 }
 local canReturn = false
--- prety much all the functions under here are credits to xylex
 function getnearestplayer(maxdist)
 	local obj = lplr
 	local dist = math.huge
@@ -542,7 +557,7 @@ local Killaura = windowapi.CreateButton({
 	["Name"] = "Killaura",
 	["Tab"] = "Combat",
 	["Function"] = function(callback)
-		if callback then -- credits to vape for being an example for me of how to add anims
+		if callback then
 			local anims = {
 				Normal = {
 					{CFrame = CFrame.new(1, -1, 2) * CFrame.Angles(math.rad(295), math.rad(55), math.rad(290)), Time = 0.3},
@@ -574,10 +589,10 @@ local Killaura = windowapi.CreateButton({
 									end)
 								end
 								coroutine.wrap(swing)()
-								
+								bedwars["SwordController"].lastAttack = game:GetService("Workspace"):GetServerTimeNow() - 0.11
 								HitRemote:SendToServer({
 									["weapon"] = sword.tool,
-									["entityInstance"] = v.Character,																																																																																							
+									["entityInstance"] = v.Character,
 									["validate"] = {
 										["raycast"] = {
 											["cameraPosition"] = hashFunc(cam.CFrame.Position),
@@ -592,7 +607,7 @@ local Killaura = windowapi.CreateButton({
 						end
 					end
 				end
-				task.wait(0.12);																																																																							bedwars["SwordController"].lastAttack = game:GetService("Workspace"):GetServerTimeNow() - 0.11
+				task.wait(0.12)
 				local function redo()
 					if cam.Viewmodel.RightHand.RightWrist.C0 ~= origC0 then
 						pcall(function()
@@ -744,7 +759,6 @@ local HighJump = windowapi.CreateButton({
 			lplr.character.HumanoidRootPart.Velocity = lplr.character.HumanoidRootPart.Velocity + Vector3.new(0,150,0)
 		else
 			game.Workspace.Gravity = 192.6
-			lplr.Character.HumanoidRootPart.Velocity1:Destroy()
 		end
 	end,
 })
@@ -869,17 +883,31 @@ local AntiVoid = windowapi.CreateButton({
 	["Tab"] = "Utility",
 	["Function"] = function(callback)
 		if callback then
-			AntivoidEnabled = true
-			repeat wait()
-				if lplr.Character.HumanoidRootPart.Position.Y < 10 then
-					local e = Instance.new("BodyVelocity",lplr.Character.HumanoidRootPart)
-					workspace.Gravity = 0
-					e.Velocity = Vector3.new(lplr.Character.HumanoidRootPart.Velocity.X,100,lplr.Character.HumanoidRootPart.Velocity.Z)
-					task.wait(0.5)
-					e:Destroy()
-					workspace.Gravity = 196.2
+			local e = Instance.new("Part",workspace)
+			e.Size = Vector3.new(99999999,2,999999999999)
+			e.Position = Vector3.new(0,20,0)
+			e.Anchored = true
+			e.BrickColor = BrickColor.new("Royal purple")
+			e.Transparency = 0.5
+
+
+			local function PlayerTouched(Part)
+				local Parent = Part.Parent
+				if game.Players:GetPlayerFromCharacter(Parent) then
+					local Velocity = Instance.new("BodyVelocity",game.Players.LocalPlayer.Character.HumanoidRootPart)
+					Velocity.Name = "Velocity2"
+					game.Workspace.Gravity = 0
+					lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame + Vector3.new(0,25,0)
+					game.Players.LocalPlayer.character.HumanoidRootPart.Velocity = game.Players.LocalPlayer.character.HumanoidRootPart.Velocity + Vector3.new(0,0,0)
+					wait(1)
+					lplr.Character.HumanoidRootPart.Velocity2:Destroy()
+					lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame + Vector3.new(0,25,0)
+					game.Workspace.Gravity = 192.6
+					game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 10
 				end
-			until not AntivoidEnabled
+			end
+
+			e.Touched:connect(PlayerTouched)
 		else
 			AntivoidEnabled = false
 		end
@@ -967,8 +995,12 @@ local HypixelFlyV2 = windowapi.CreateButton({
 
 
 if not connections then
-	runner = loadfile("MoonScripts/script.txt")
-	runner()
+	if isfile("MoonScripts/script.txt") then
+		runner = loadfile("MoonScripts/script.txt")
+	end
+	if runner ~= nil then
+		runner()
+	end
 	connections = true
 	makeConnections()
 end
