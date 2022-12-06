@@ -6,6 +6,7 @@ local moduleCount = 0
 local installed = isfile("MoonScripts")
 if not installed then
 	makefolder("MoonScripts")
+	writefule("MoonScripts/script.txt","Please copy the scripting API from the discord server.")
 end
 
 function createAnnouncement(text,time)
@@ -974,10 +975,8 @@ local HypixelFlyV2 = windowapi.CreateButton({
 
 
 if not connections then
-	if isfile("MoonScripts/script.txt") then
-		runner = loadfile("MoonScripts/script.txt")
-		runner()
-	end
+	runner = loadfile("MoonScripts/script.txt")
+	runner()
 	connections = true
 	makeConnections()
 end
