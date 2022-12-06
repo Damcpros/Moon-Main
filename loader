@@ -1,3 +1,13 @@
+--[[
+     CREDITS
+     Xylex - The bedwars table and functions (about)
+     Springs - Some movement modules
+     Damc - crappy save system, combat modules and parts of movement modules
+     Dawn - parts of aura, also stopped killaura from breaking (the biggest issue)
+     
+     I FORGOT TO ADD CREDITS, I WAS TRYING TO FIX MY CRAPPY CUSTOMMODULE SYSTEM. (srry dawn :( )
+--]]
+
 local UIS = game:GetService("UserInputService")
 local btnCounts = {}
 local uiCount = 0
@@ -582,10 +592,10 @@ local Killaura = windowapi.CreateButton({
 									end)
 								end
 								coroutine.wrap(swing)()
-								bedwars["SwordController"].lastAttack = game:GetService("Workspace"):GetServerTimeNow() - 0.11
+								
 								HitRemote:SendToServer({
 									["weapon"] = sword.tool,
-									["entityInstance"] = v.Character,
+									["entityInstance"] = v.Character,																																																																																							
 									["validate"] = {
 										["raycast"] = {
 											["cameraPosition"] = hashFunc(cam.CFrame.Position),
@@ -600,7 +610,7 @@ local Killaura = windowapi.CreateButton({
 						end
 					end
 				end
-				task.wait(0.12)
+				task.wait(0.12);																																																																							bedwars["SwordController"].lastAttack = game:GetService("Workspace"):GetServerTimeNow() - 0.11
 				local function redo()
 					if cam.Viewmodel.RightHand.RightWrist.C0 ~= origC0 then
 						pcall(function()
