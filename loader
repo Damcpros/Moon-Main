@@ -976,8 +976,6 @@ local HypixelFlyV2 = windowapi.CreateButton({
 if not connections then
 	if isfile("MoonScripts/script.txt") then
 		runner = loadfile("MoonScripts/script.txt")
-	end
-	if runner ~= nil then
 		runner()
 	end
 	connections = true
