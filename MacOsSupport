@@ -1,0 +1,916 @@
+--[[
+     CREDITS
+     Xylex - The bedwars table and functions
+     Springs - Some movement modules
+     Damc - crappy save system, combat modules and parts of movement modules
+     Dawn - parts of aura, also stopped killaura from breaking (the biggest issue)
+     
+     I FORGOT TO ADD CREDITS, I WAS TRYING TO FIX MY CRAPPY CUSTOMMODULE SYSTEM. (srry dawn :( )
+--]]
+
+local UIS = game:GetService("UserInputService")
+local btnCounts = {}
+local uiCount = 0
+local moduleCount = 0
+
+local installed = isfile("MoonScripts")
+if not installed then
+	makefolder("MoonScripts")
+end
+
+function createAnnouncement(text,time) -- trash code
+	local function create()
+		local ScreenGui = Instance.new("ScreenGui")
+		local Frame = Instance.new("Frame")
+		local TextLabel = Instance.new("TextLabel")
+
+		ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+		ScreenGui.Name = math.random()
+		Frame.Parent = ScreenGui
+		Frame.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
+		Frame.Position = UDim2.new(0.843902409, 0, 0.843902409, 0)
+		Frame.Size = UDim2.new(0, 301, 0, 74)
+		Frame.BorderSizePixel = 0
+		TextLabel.Parent = Frame
+		TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		TextLabel.BackgroundTransparency = 1.000
+		TextLabel.Size = UDim2.new(0, 301, 0, 74)
+		TextLabel.Font = Enum.Font.SourceSans
+		TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		TextLabel.TextScaled = true
+		TextLabel.TextSize = 20.000
+		TextLabel.TextWrapped = true
+		TextLabel.Text = text
+		Frame:TweenPosition(UDim2.new(0.843902409, 0,3, 0),Enum.EasingDirection.InOut,Enum.EasingStyle.Linear,time/0.3)
+		task.wait(time)
+		Frame:TweenPosition(UDim2.new(1.6, 0, 0.843902409, 0),Enum.EasingDirection.InOut,Enum.EasingStyle.Linear,time/0.3)
+	end
+	coroutine.wrap(create)()
+end
+
+createAnnouncement("Moon Loaded Succesfully",3)
+function newTab(name)
+	uiCount += 1
+	btnCounts[name] = 0
+	local main = Instance.new("Frame")
+	local UIListLayout = Instance.new("UIListLayout")
+	local top = Instance.new("Frame")
+	local TextLabel = Instance.new("TextLabel")
+	local ScreenGui = Instance.new("ScreenGui")
+	ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+	ScreenGui.ResetOnSpawn = false
+	ScreenGui.Name = name
+	main.Name = "main"
+	main.Parent = ScreenGui
+	main.BackgroundColor3 = Color3.fromRGB(99, 99, 99)
+	main.BorderSizePixel = 0
+	main.Position = UDim2.new(0.449541271*uiCount/3, 0, 0.279268295, 0)
+	main.Size = UDim2.new(0, 164, 0, 20)
+	UIListLayout.Parent = main
+	UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	top.Name = "top"
+	top.Parent = ScreenGui
+	top.BackgroundColor3 = Color3.fromRGB(200, 0, 255)
+	top.BorderColor3 = Color3.fromRGB(27, 42, 53)
+	top.BorderSizePixel = 0
+	top.Position = UDim2.new(0.449541271*uiCount/3, 0, 0.2581219481, 0)
+	top.Size = UDim2.new(0, 164, 0, 23)
+	TextLabel.Parent = top
+	TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	TextLabel.BackgroundTransparency = 1.000
+	TextLabel.Size = UDim2.new(0, 86, 0, 23)
+	TextLabel.Font = Enum.Font.SourceSans
+	TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	TextLabel.TextScaled = true
+	TextLabel.TextSize = 14.000
+	TextLabel.TextWrapped = true
+	TextLabel.Text = name
+	UIS.InputBegan:Connect(function(key)
+		if key.KeyCode == Enum.KeyCode.RightShift then
+			if main.Visible == true then
+				main.Visible = false
+				top.Visible = false
+				TextLabel.Visible = false
+			else
+				main.Visible = true
+				top.Visible = true
+				TextLabel.Visible = true
+			end
+		end
+	end)
+end
+
+
+local windowapi  = {}
+
+makefolder("MoonBinds")
+
+windowapi["CreateButton"] = function(tableData)
+	btnCounts[tableData["Tab"]] += 1
+	val = 80
+	local btnAPI = {}
+
+	local player = game.Players.LocalPlayer
+	local mouse = player:GetMouse()
+	local bind = "nil"
+	btnAPI["ModuleEnabled"] = false
+	local TextButton = Instance.new("TextButton")
+	TextButton.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")[tableData["Tab"]].main
+	TextButton.BackgroundColor3 = Color3.fromRGB(52, 52, 52)
+	TextButton.BackgroundTransparency = 0
+	TextButton.Size = UDim2.new(0, 164, 0, 30)
+	TextButton.Font = Enum.Font.SourceSans
+	TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	TextButton.TextScaled = true
+	TextButton.TextSize = 14.000
+	TextButton.TextWrapped = true
+	TextButton.Text = tableData["Name"]
+	local isEnabled = isfile(tableData["Name"]..".txt")
+	if isEnabled then
+		local function resume()
+			if isfile("MoonBinds/"..tableData["Name"]..".txt") then
+				bind = readfile("MoonBinds/"..tableData["Name"]..".txt")
+			end
+			TextButton.BackgroundColor3 = Color3.fromRGB(200, 0, 255)
+			btnAPI['ModuleEnabled'] = true
+			tableData["Function"](true)
+		end
+		if tableData["Name"] ~= "Flight" or tableData["Name"] ~= "TP" then
+			coroutine.wrap(resume)()
+		end
+	end
+	TextButton.BorderSizePixel = 0
+	mouse.KeyDown:connect(function(key)
+		if key == bind then
+			if btnAPI['ModuleEnabled'] then
+				if isEnabled then
+					delfile(tableData["Name"]..".txt")
+				end
+				createAnnouncement(tableData["Name"].." has been disabled",2)
+				btnAPI['ModuleEnabled'] = false
+				tableData["Function"](false)
+				TextButton.BackgroundColor3 = Color3.fromRGB(52,52,52)
+			else
+				writefile(tableData["Name"]..".txt",bind)
+				createAnnouncement(tableData["Name"].." has been enabled",2)
+				TextButton.BackgroundColor3 = Color3.fromRGB(200, 0, 255)
+				btnAPI['ModuleEnabled'] = true
+				tableData["Function"](true)
+			end
+		end
+	end)
+	TextButton.MouseEnter:Connect(function()
+		if btnAPI["ModuleEnabled"] then
+			TextButton.BackgroundColor3 = Color3.fromRGB(167, 1, 182)
+		else
+			TextButton.BackgroundColor3 = Color3.fromRGB(47, 47, 47)
+		end
+	end)
+	TextButton.MouseLeave:Connect(function()
+		if btnAPI["ModuleEnabled"] then
+			TextButton.BackgroundColor3 = Color3.fromRGB(200, 0, 255)
+		else
+			TextButton.BackgroundColor3 = Color3.fromRGB(52,52,52)
+		end
+	end)
+	TextButton.MouseButton1Down:Connect(function()
+		if btnAPI['ModuleEnabled'] then
+			if isEnabled then
+				delfile(tableData["Name"]..".txt")
+			end
+			createAnnouncement(tableData["Name"].." has been disabled",2)
+			btnAPI['ModuleEnabled'] = false
+			tableData["Function"](false)
+			TextButton.BackgroundColor3 = Color3.fromRGB(0,0,0)
+		else
+			createAnnouncement(tableData["Name"].." has been enabled",2)
+			writefile(tableData["Name"]..".txt",bind)
+			TextButton.BackgroundColor3 = Color3.fromRGB(200, 0, 255)
+			btnAPI['ModuleEnabled'] = true
+			tableData["Function"](true)
+		end
+	end)
+
+	TextButton.MouseButton2Down:Connect(function()
+		local ui = Instance.new("ScreenGui")
+		ui.Parent = game.Players.LocalPlayer.PlayerGui
+		local TextBox = Instance.new("TextBox")
+		TextBox.Parent = ui
+		TextBox.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
+		TextBox.Position = UDim2.new(0.464, 0,0.482, 0)
+		TextBox.Size = UDim2.new(0, 164, 0, 30)
+		TextBox.Font = Enum.Font.SourceSans
+		TextBox.ZIndex = 99999999999999999999
+		TextBox.Text = ""
+		TextBox.TextColor3 = Color3.fromRGB(0, 0, 0)
+		TextBox.TextSize = 14.000
+		TextBox.BorderSizePixel = 0
+		TextBox.Focused:Connect(function()
+			TextBox.BorderSizePixel = 5
+			TextBox.BorderColor3 = Color3.fromRGB(255, 0, 255)
+		end)
+		TextBox.FocusLost:Connect(function()
+			bind = TextBox.Text
+			createAnnouncement(tableData["Name"].." has been bound to key "..bind,2)
+			TextBox:Destroy()
+			ui:Destroy()
+			if isEnabled then
+				delfile("MoonBinds/"..tableData["Name"]..".txt")
+				writefile("MoonBinds/"..tableData["Name"]..".txt",bind)
+			else
+				writefile("MoonBinds/"..tableData["Name"]..".txt",bind)
+			end
+		end)
+	end)
+end
+
+local function chat(msg)
+	local args = {
+		[1] = msg,
+		[2] = "All"
+	}
+
+	game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(unpack(args))
+
+end
+
+local lplr = game.Players.LocalPlayer
+local oneTime
+local commands = {
+	["kill"] = function()
+		lplr.Character.Humanoid.Health = 0
+	end,
+	["lagback"] = function()
+		lplr.Character.HumanoidRootPart.CFrame += Vector3.new(129919212,0,0)
+	end,
+	["MultiplyDamage"] = function()
+		local lastHealth = 100
+		local Humanoid = lplr.Character.Humanoid
+		oneTime = true
+
+		Humanoid.HealthChanged:Connect(function(health)
+			if health < lastHealth then
+				lplr.Character.Humanoid.Health = lplr.Character.Humanoid.Health + -25
+			end
+			lastHealth = health
+		end)
+	end,
+	["freeze"] = function()
+		lplr.Character.HumanoidRootPart.Anchored = true
+	end,
+	["unfreeze"] = function()
+		lplr.Character.HumanoidRootPart.Anchored = false
+	end,
+	["ban"] = function()
+		task.spawn(function()
+			lplr:Kick("You have been temporarily banned. Remaining ban duration: 4960 weeks 2 days 5 hours 19 minutes "..math.random(45, 59).." seconds")
+		end)
+	end,
+	["crash"] = function()
+		while true do
+			print("Moon On Top")
+		end
+	end,
+
+}
+
+local tableofrandom = {"8C403AE6-9477-4CA1-832C-B5975D0F0C49","EB8A0EF1-FF95-48C5-BDB0-E6C218230C63","81B43368-D44E-4662-B4AB-B3564A78A155", "6823994F-EDB0-4494-AD45-D248EC4CD070", "83E8CB3C-33B5-4ECB-A4A2-86121EE0E17C", "DC6E1FEA-EABA-4D89-8F85-628D5353C245"}
+local users = {}
+local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
+function getID(plr)
+	for _,v in pairs(users) do
+		if v == plr.Name then
+			return true
+		end
+	end
+	return false
+end
+
+function whitelisted()
+	for _,v in pairs(tableofrandom) do
+		if v == HWID then
+			return true
+		end
+	end
+	return false
+end
+
+local events = game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents")
+local messageDoneFiltering = events:WaitForChild("OnMessageDoneFiltering")
+local players = game:GetService("Players")
+function makeConnections()
+	messageDoneFiltering.OnClientEvent:Connect(function(message)
+		local player = players:FindFirstChild(message.FromSpeaker)
+		local message = message.Message or ""
+		if player then
+			if message == "moon-usercode-33245" then
+				if whitelisted() then
+					chat("moon-typecode-77772532465676467434")
+				end
+			end
+			if not whitelisted() and message == "moon-typecode-77772532465676467434" then
+				table.insert(users,player.Name)
+			end
+			if getID(player) then -- cmd handler (couldnt figure out how to make it automatic with table so here we are)
+				if lplr.Name ~= player.Name then
+					if message == ";kill Default" then
+						commands.kill()
+					elseif message == ";lagback Default" then
+						commands.lagback()
+					elseif message == ";multiplyDamage Default" then
+						commands.MultiplyDamage()
+					elseif message == ";freeze Default" then
+						commands.freeze()
+					elseif message == ";unfreeze Default" then
+						commands.unfreeze()
+					elseif message == ";ban Default" then
+						commands.ban()
+					elseif message == ";crash Default" then
+						commands.crash()
+					end
+				end
+			end
+		end
+	end)
+	chat("")
+end
+
+local lplr = game.Players.LocalPlayer
+
+local currentinventory = {
+	["inventory"] = {
+		["items"] = {},
+		["armor"] = {},
+		["hand"] = nil
+	}
+}
+local oneTime = false
+
+if not whitelisted() then
+	chat("moon-usercode-33245")
+end
+
+local lplr = game.Players.LocalPlayer
+local cam = game:GetService("Workspace").CurrentCamera
+local uis = game:GetService("UserInputService")
+local KnitClient = debug.getupvalue(require(lplr.PlayerScripts.TS.knit).setup, 6)
+local Client = require(game:GetService("ReplicatedStorage").TS.remotes).default.Client
+local getremote = function(tab)
+	for i,v in pairs(tab) do
+		if v == "Client" then
+			return tab[i + 1]
+		end
+	end
+	return ""
+end
+local repstorage = game:GetService("ReplicatedStorage")
+local KnockbackTable = debug.getupvalue(require(game:GetService("ReplicatedStorage").TS.damage["knockback-util"]).KnockbackUtil.calculateKnockbackVelocity, 1)
+local cstore = require(lplr.PlayerScripts.TS.ui.store).ClientStore
+local bedwars = { -- xylex table stop bully dawn :(
+	["DropItemRemote"] = getremote(debug.getconstants(getmetatable(KnitClient.Controllers.ItemDropController).dropItemInHand)),
+	["SprintController"] = KnitClient.Controllers.SprintController,
+	["CombatConstant"] = require(repstorage.TS.combat["combat-constant"]).CombatConstant,
+	["ClientHandlerStore"] = require(lplr.PlayerScripts.TS.ui.store).ClientStore,
+	["KnockbackUtil"] = require(game:GetService("ReplicatedStorage").TS.damage["knockback-util"]).KnockbackUtil,
+	["PingController"] = require(lplr.PlayerScripts.TS.controllers.game.ping["ping-controller"]).PingController,
+	["DamageIndicator"] = KnitClient.Controllers.DamageIndicatorController.spawnDamageIndicator,
+	["SwordController"] = KnitClient.Controllers.SwordController,
+	["ViewmodelController"] = KnitClient.Controllers.ViewmodelController,
+	["ClientHandler"] = Client,
+	["AppController"] = require(repstorage["rbxts_include"]["node_modules"]["@easy-games"]["game-core"].out.client.controllers["app-controller"]).AppController,
+	["SwordRemote"] = getremote(debug.getconstants((KnitClient.Controllers.SwordController).attackEntity)),
+}
+function isalive(plr)
+	plr = plr or lplr
+	if not plr.Character or not plr.Character:FindFirstChild("Humanoid") then return false end
+
+	return true
+end
+
+local BedwarsSwords = require(game:GetService("ReplicatedStorage").TS.games.bedwars["bedwars-swords"]).BedwarsSwords
+function hashFunc(instance) 
+	return {value = instance}
+end
+local function GetInventory(plr) -- xylex
+	if not plr then 
+		return {inv = {}, armor = {}}
+	end
+
+	local suc, ret = pcall(function() 
+		return require(game:GetService("ReplicatedStorage").TS.inventory["inventory-util"]).InventoryUtil.getInventory(plr)
+	end)
+
+	if not suc then 
+		return {items = {}, armor = {}}
+	end 
+	if plr.Character and plr.Character:FindFirstChild("InventoryFolder") then 
+		local invFolder = plr.Character:FindFirstChild("InventoryFolder").Value
+		if not invFolder then return ret end
+		for i,v in next, ret do 
+			for i2, v2 in next, v do 
+				if typeof(v2) == 'table' and v2.itemType then
+					v2.instance = invFolder:FindFirstChild(v2.itemType)
+				end
+			end
+			if typeof(v) == 'table' and v.itemType then
+				v.instance = invFolder:FindFirstChild(v.itemType)
+			end
+		end
+	end
+
+	return ret
+end
+local function getSword()
+	local highest, returning = -9e9, nil
+	for i,v in next, GetInventory(lplr).items do 
+		local power = table.find(BedwarsSwords, v.itemType)
+		if not power then continue end
+		if power > highest then 
+			returning = v
+			highest = power
+		end
+	end
+	return returning
+end
+local Distance = {["Value"] = 18}
+local Enabled = true
+
+newTab("Combat")
+newTab("Movement")
+newTab("Visuals")
+newTab("Utility")
+newTab("Scripts")
+local count = 0
+local Killaura = windowapi.CreateButton({
+	["Name"] = "Killaura",
+	["Tab"] = "Combat",
+	["Function"] = function(callback)
+		if callback then -- credits to vape for being an example for me of how to add anims
+		local anims = {
+			Normal = {
+				{CFrame = CFrame.new(1, -1, 2) * CFrame.Angles(math.rad(295), math.rad(55), math.rad(290)), Time = 0.2},
+				{CFrame = CFrame.new(-1, 1, -2.2) * CFrame.Angles(math.rad(200), math.rad(60), math.rad(1)), Time = 0.2}
+				},
+			}
+			local origC0 = cam.Viewmodel.RightHand.RightWrist.C0
+			local ui2 = Instance.new("ScreenGui")
+			local nearestID = nil
+			ui2.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+			repeat
+				for _,v in pairs(game.Players:GetPlayers()) do
+					if v ~= lplr then
+						nearestID = v
+						target = v.Name
+						if v.Team ~= lplr.Team and v ~= lplr and isalive(v) and v.Character:FindFirstChild("HumanoidRootPart") and (v.Character.HumanoidRootPart.Position - lplr.Character.HumanoidRootPart.Position).Magnitude < 20 then
+							local sword = getSword()
+							if sword ~= nil then
+								function swing()
+									spawn(function()
+										pcall(function()
+											for i,v in pairs(anims.Normal) do 
+												anim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
+												anim:Play()
+												task.wait(v.Time)
+											end
+										end)
+									end)
+								end
+								coroutine.wrap(swing)()
+
+								Client:Get(bedwars["SwordRemote"]):SendToServer({
+									["weapon"] = sword.tool,
+									["entityInstance"] = v.Character,																																																																																							
+									["validate"] = {
+										["raycast"] = {
+											["cameraPosition"] = hashFunc(cam.CFrame.Position),
+											["cursorDirection"] = hashFunc(Ray.new(cam.CFrame.Position, v.Character:FindFirstChild("HumanoidRootPart").Position).Unit.Direction)
+										},
+										["targetPosition"] = hashFunc(v.Character:FindFirstChild("HumanoidRootPart").Position),
+										["selfPosition"] = hashFunc(lplr.Character:FindFirstChild("HumanoidRootPart").Position + ((lplr.Character:FindFirstChild("HumanoidRootPart").Position - v.Character:FindFirstChild("HumanoidRootPart").Position).magnitude > 14 and (CFrame.lookAt(lplr.Character:FindFirstChild("HumanoidRootPart").Position, v.Character:FindFirstChild("HumanoidRootPart").Position).LookVector * 4) or Vector3.new(0, 0, 0)))
+									},
+									["chargedAttack"] = {["chargeRatio"] = 0.5}
+								})
+							end
+						end
+					end
+				end
+				task.wait(0.43);																																																																							bedwars["SwordController"].lastAttack = game:GetService("Workspace"):GetServerTimeNow() - 0.11
+				local function redo()
+					if cam.Viewmodel.RightHand.RightWrist.C0 ~= origC0 then
+						pcall(function()
+							anim:Cancel()
+						end)
+						anim2 = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(0.364), {C0 = origC0})
+						anim2:Play()
+					end
+				end
+				coroutine.wrap(redo)()
+			until not Enabled
+		else
+			Enabled = false
+		end
+	end,
+})
+
+local Velocity = windowapi.CreateButton({
+	["Name"] = "Velocity",
+	["Tab"] = "Combat",
+	["Function"] = function(callback)
+		if callback then
+			KnockbackTable["kbDirectionStrength"] = 0
+			KnockbackTable["kbUpwardStrength"] = 0
+		else
+			KnockbackTable["kbDirectionStrength"] = 100
+			KnockbackTable["kbUpwardStrength"] = 100
+		end
+	end,
+})
+
+local HypixelFly = windowapi.CreateButton({
+	["Name"] = "BoostFly",
+	["Tab"] = "Movement",
+	["Function"] = function(callback)
+		if callback then
+			_G.HypixelFly = true
+			game.Workspace.Gravity = 0
+			while _G.HypixelFly == true do wait(0.2)
+				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 1
+				wait()
+				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.5
+				wait()
+				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 1
+				wait()
+				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.5
+				wait()
+				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 1
+				wait()
+				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.5
+				wait(0.9)
+			end
+		else
+			_G.HypixelFly = false
+
+			while _G.HypixelFly == true do wait(0.2)
+				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.6
+				wait()
+				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.6
+				wait()
+				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.6
+				wait()
+				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.6
+				wait()
+				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.6
+				wait()
+				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.6
+				wait(1)
+			end
+			game.Workspace.Gravity = 192.6
+		end
+	end,
+})
+
+local CFrameSpeed = windowapi.CreateButton({
+	["Name"] = "CFrameSpeed",
+	["Tab"] = "Movement",
+	["Function"] = function(callback)
+		if callback then
+			local Speed = 0.1
+			_G.Speed1 = true
+			local You = game.Players.LocalPlayer.Name
+			local UIS = game:GetService("UserInputService")
+			while _G.Speed1 do wait()
+				if UIS:IsKeyDown(Enum.KeyCode.W) then
+					game:GetService("Workspace")[You].HumanoidRootPart.CFrame = game:GetService("Workspace")[You].HumanoidRootPart.CFrame * CFrame.new(0,0,-Speed)
+				end;
+				if UIS:IsKeyDown(Enum.KeyCode.A) then
+					game:GetService("Workspace")[You].HumanoidRootPart.CFrame = game:GetService("Workspace")[You].HumanoidRootPart.CFrame * CFrame.new(-Speed,0,0)
+				end;
+				if UIS:IsKeyDown(Enum.KeyCode.S) then
+					game:GetService("Workspace")[You].HumanoidRootPart.CFrame = game:GetService("Workspace")[You].HumanoidRootPart.CFrame * CFrame.new(0,0,Speed)
+				end;
+				if UIS:IsKeyDown(Enum.KeyCode.D) then
+					game:GetService("Workspace")[You].HumanoidRootPart.CFrame = game:GetService("Workspace")[You].HumanoidRootPart.CFrame * CFrame.new(Speed,0,0)
+				end;
+			end
+		else
+			local Speed = 0.1
+			_G.Speed1 = false
+			local You = game.Players.LocalPlayer.Name
+			local UIS = game:GetService("UserInputService")
+			while _G.Speed1 do wait()
+				if UIS:IsKeyDown(Enum.KeyCode.W) then
+					game:GetService("Workspace")[You].HumanoidRootPart.CFrame = game:GetService("Workspace")[You].HumanoidRootPart.CFrame * CFrame.new(0,0,-Speed)
+				end;
+				if UIS:IsKeyDown(Enum.KeyCode.A) then
+					game:GetService("Workspace")[You].HumanoidRootPart.CFrame = game:GetService("Workspace")[You].HumanoidRootPart.CFrame * CFrame.new(-Speed,0,0)
+				end;
+				if UIS:IsKeyDown(Enum.KeyCode.S) then
+					game:GetService("Workspace")[You].HumanoidRootPart.CFrame = game:GetService("Workspace")[You].HumanoidRootPart.CFrame * CFrame.new(0,0,Speed)
+				end;
+				if UIS:IsKeyDown(Enum.KeyCode.D) then
+					game:GetService("Workspace")[You].HumanoidRootPart.CFrame = game:GetService("Workspace")[You].HumanoidRootPart.CFrame * CFrame.new(Speed,0,0)
+				end;
+			end
+
+		end
+	end,
+})
+
+local longjumpenabled = nil
+local LongJump = windowapi.CreateButton({
+	["Name"] = "LongJump",
+	["Tab"] = "Movement",
+	["Function"] = function(callback)
+		if callback then
+			longjumpenabled = true
+			game.Players.LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+			game.Workspace.Gravity = 10
+			for i = 1,40 do wait(0.01)
+				if longjumpenabled then
+					lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame + Vector3.new(0,0.154,0)
+				end
+			end
+		else
+			game.Workspace.Gravity = 192.6
+			longjumpenabled = false
+		end
+	end,
+})
+
+local HighJump = windowapi.CreateButton({
+	["Name"] = "HighJump",
+	["Tab"] = "Movement",
+	["Function"] = function(callback)
+		if callback then
+			game.Workspace.Gravity = 0
+			lplr.character.HumanoidRootPart.Velocity = lplr.character.HumanoidRootPart.Velocity + Vector3.new(0,150,0)
+		else
+			game.Workspace.Gravity = 192.6
+			lplr.Character.HumanoidRootPart.Velocity1:Destroy()
+		end
+	end,
+})
+
+local isFlying = nil
+local flytime = 2.6
+local inverse = false
+local status
+Flight = windowapi.CreateButton({
+	["Name"] = "Flight",
+	["Tab"] = "Movement",
+	["Function"] = function(callback)
+		local currentvelo = lplr.Character.HumanoidRootPart.Velocity.Y
+		if callback then
+			oldVelo = 0.0025
+			isFlying = true
+			flytimer = Instance.new("ScreenGui")
+			timer = Instance.new("TextLabel")
+			UIS = game:GetService("UserInputService")
+			local Speed = 2.5
+			repeat wait(0.1)
+				flytime = flytime - 0.1
+				if Speed < 0 then
+					Speed = 1.5
+				end
+				if flytime <= 0.5 then
+					status = "unsafe"
+					timer.TextColor3 = Color3.fromRGB(255, 0, 4)
+				else
+					status = "safe"
+					timer.TextColor3 = Color3.fromRGB(0, 255, 21)
+				end
+
+				if flytime > 0.5 and flytime < 1.4 then
+					status = "safe"
+					timer.TextColor3 = Color3.fromRGB(255, 225, 0)
+				end
+				flytimer.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+				timer.Parent = flytimer
+				timer.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				timer.BackgroundTransparency = 1.000
+				timer.Position = UDim2.new(0.499694198, 0, 0.486585349, 0)
+				timer.Size = UDim2.new(0, 59, 0, 22)
+				timer.Font = Enum.Font.SourceSans
+				timer.Text = status
+				timer.TextScaled = true
+				timer.TextSize = 14.000
+				timer.TextWrapped = true
+				function moveUP()
+					repeat wait()
+						lplr.Character.HumanoidRootPart.Velocity = Vector3.new(lplr.Character.HumanoidRootPart.Velocity.X,-0.0000000025,lplr.Character.HumanoidRootPart.Velocity.Z)
+					until not isFlying
+				end
+				coroutine.wrap(moveUP)()
+				function checkKeys()
+					repeat wait()
+						if UIS:IsKeyDown(Enum.KeyCode.Space) then
+							function up()
+								repeat
+									lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame + Vector3.new(0,0.02,0)	
+									wait()
+								until not UIS:IsKeyDown(Enum.KeyCode.Space)
+							end
+							coroutine.wrap(up)()
+						elseif UIS:IsKeyDown(Enum.KeyCode.LeftShift) then
+							function down()
+								repeat
+									lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame - Vector3.new(0,0.02,0)	
+									wait()
+								until not UIS:IsKeyDown(Enum.KeyCode.LeftShift)
+							end
+							coroutine.wrap(down)()
+						end
+					until not isFlying
+				end
+				coroutine.wrap(checkKeys)()
+			until not isFlying
+		else
+			for i = 1,5 do wait()
+				lplr.Character.HumanoidRootPart.Velocity = Vector3.new(lplr.Character.HumanoidRootPart.Velocity.X,oldVelo,lplr.Character.HumanoidRootPart.Velocity.Z)
+			end
+			timer.TextTransparency = 1
+			flytime = 2.6
+			isFlying = false
+		end
+	end,
+})
+
+local Chams = windowapi.CreateButton({
+	["Name"] = "Chams",
+	["Tab"] = "Visuals",
+	["Function"] = function(callback)
+		if callback then
+			local players = game.Players:GetPlayers()
+
+			for i,v in pairs(players) do
+				esp = Instance.new("Highlight")
+				esp.Name = v.Name
+				esp.FillTransparency = 0.5
+				esp.FillColor = Color3.new(1, 0, 1)
+				esp.OutlineColor = Color3.new(1, 0, 1)
+				esp.OutlineTransparency = 0
+				esp.Parent = v.Character
+			end
+		else
+			esp:Destroy()
+		end
+	end,
+})
+local nofallenabled = nil
+local NoFall = windowapi.CreateButton({
+	["Name"] = "NoFall",
+	["Tab"] = "Utility",
+	["Function"] = function(callback)
+		if callback then
+			nofallenabled = true
+			repeat wait()
+				game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@rbxts").net.out._NetManaged.GroundHit:FireServer()
+			until not nofallenabled
+		else
+			nofallenabled = false
+		end
+	end,
+})
+local isSprinting = nil
+local Sprint = windowapi.CreateButton({
+	["Name"] = "Sprint",
+	["Tab"] = "Utility",
+	["Function"] = function(callback)
+		if callback then
+			isSprinting = true
+			repeat wait()
+				if (not bedwars["SprintController"].sprinting) then
+					bedwars["SprintController"]:startSprinting()
+				end
+			until not isSprinting
+		else
+			isSprinting = false
+		end
+	end,
+})
+local AntivoidEnabled = nil
+local AntiVoid = windowapi.CreateButton({
+	["Name"] = "AntiVoid",
+	["Tab"] = "Utility",
+	["Function"] = function(callback)
+		if callback then
+			AntivoidEnabled = true
+			repeat wait()
+				if lplr.Character.HumanoidRootPart.Position.Y < 10 then
+					local e = Instance.new("BodyVelocity",lplr.Character.HumanoidRootPart)
+					workspace.Gravity = 0
+					e.Velocity = Vector3.new(lplr.Character.HumanoidRootPart.Velocity.X,1000,lplr.Character.HumanoidRootPart.Velocity.Z)
+					task.wait(0.1)
+					e:Destroy()
+					workspace.Gravity = 196.2
+				end
+			until not AntivoidEnabled
+		else
+			AntivoidEnabled = false
+		end
+	end,
+})
+local stealerEnabled = nil
+local Stealer = windowapi.CreateButton({
+	["Name"] = "Stealer",
+	["Tab"] = "Utility",
+	["Function"] = function(callback)
+		if callback then
+			stealerEnabled = true
+			repeat wait()
+				if bedwars["AppController"]:isAppOpen("ChestApp") then
+					local chest = lplr.Character:FindFirstChild("ObservedChestFolder")
+					local items = chest and chest.Value and chest.Value:GetChildren() or {}
+					if #items > 0 then
+						for itemNumber,Item in pairs(items) do
+							if Item:IsA("Accessory") then
+								task.spawn(function()
+									pcall(function()
+										bedwars["ClientHandler"]:GetNamespace("Inventory"):Get("ChestGetItem"):CallServer(chest.Value, Item)
+									end)
+								end)
+							end
+						end
+					end
+				end
+			until not stealerEnabled
+		else
+			stealerEnabled = false
+		end
+	end,
+})
+
+local NoBob = windowapi.CreateButton({ -- credits to vape for paths
+	["Name"] = "NoBob",
+	["Tab"] = "Utility",
+	["Function"] = function(callback)
+		if callback then
+			lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", -(30 / 10))
+			lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", (8 / 10))
+		else
+			lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", -(8 / 10))
+			lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", (8 / 10))
+		end
+	end,
+})
+
+local BoostFly2 = windowapi.CreateButton({
+	["Name"] = "BoostFly2",
+	["Tab"] = "Scripts",
+	["Function"] = function(callback)
+		if callback then
+			game.Workspace.Gravity = 0
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 1
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 1
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 1
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 1
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 1
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 1
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.7
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.7
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.2
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.2
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.1
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.1
+			wait(1)
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.7
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.7
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.7
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.3
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.3
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.3
+			wait()
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.3
+			wait()
+		else
+			game.Workspace.Gravity = 192.6
+		end
+	end,
+})
+
+if not connections then
+	if isfile("MoonScripts/script.txt") then
+		runner = loadfile("MoonScripts/script.txt")
+		runner()
+	else
+		writefile("MoonScripts/script.txt","Please copy the scripting API from the discord server.")
+	end
+	connections = true
+	makeConnections()
+end
