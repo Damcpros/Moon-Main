@@ -41,9 +41,9 @@ function createAnnouncement(text,time) -- trash code
 		TextLabel.TextSize = 20.000
 		TextLabel.TextWrapped = true
 		TextLabel.Text = text
-		Frame:TweenPosition(UDim2.new(0.843902409, 0,3, 0),Enum.EasingDirection.InOut,Enum.EasingStyle.Linear,time/0.3)
+		Frame:TweenPosition(UDim2.new(0.843902409, 0,6, 0),Enum.EasingDirection.InOut,Enum.EasingStyle.Linear,time/0.3)
 		task.wait(time)
-		Frame:TweenPosition(UDim2.new(1.6, 0, 0.843902409, 0),Enum.EasingDirection.InOut,Enum.EasingStyle.Linear,time/0.3)
+		Frame:TweenPosition(UDim2.new(1.6, 0, -6, 0),Enum.EasingDirection.InOut,Enum.EasingStyle.Linear,time/0.3)
 	end
 	coroutine.wrap(create)()
 end
@@ -85,16 +85,26 @@ function newTab(name)
 	TextLabel.TextSize = 14.000
 	TextLabel.TextWrapped = true
 	TextLabel.Text = name
+	local blurEffect = Instance.new("BlurEffect")
+	blurEffect.Parent = main
+	blurEffect.Size = 20
+
 	UIS.InputBegan:Connect(function(key)
 		if key.KeyCode == Enum.KeyCode.RightShift then
 			if main.Visible == true then
 				main.Visible = false
 				top.Visible = false
 				TextLabel.Visible = false
+				blurEffect:Destroy()
+				rainbowTop.Visible = false
 			else
+				local blurEffect = Instance.new("BlurEffect")
+				blurEffect.Parent = main
+				blurEffect.Size = 20
 				main.Visible = true
 				top.Visible = true
 				TextLabel.Visible = true
+				rainbowTop.Visible = true
 			end
 		end
 	end)
@@ -126,6 +136,9 @@ windowapi["CreateButton"] = function(tableData)
 	TextButton.TextWrapped = true
 	TextButton.Text = tableData["Name"]
 	local isEnabled = isfile(tableData["Name"]..".txt")
+	if isfile("MoonBinds/"..tableData["Name"]..".txt") then
+		bind = readfile("MoonBinds/"..tableData["Name"]..".txt")
+	end
 	if isEnabled then
 		local function resume()
 			if isfile("MoonBinds/"..tableData["Name"]..".txt") then
@@ -135,7 +148,7 @@ windowapi["CreateButton"] = function(tableData)
 			btnAPI['ModuleEnabled'] = true
 			tableData["Function"](true)
 		end
-		if tableData["Name"] ~= "Flight" or tableData["Name"] ~= "TP" then
+		if tableData["Name"] ~= "Flight" then
 			coroutine.wrap(resume)()
 		end
 	end
@@ -173,6 +186,8 @@ windowapi["CreateButton"] = function(tableData)
 			TextButton.BackgroundColor3 = Color3.fromRGB(52,52,52)
 		end
 	end)
+
+	-- Usage:
 	TextButton.MouseButton1Down:Connect(function()
 		if btnAPI['ModuleEnabled'] then
 			if isEnabled then
@@ -274,7 +289,7 @@ local commands = {
 
 }
 
-local tableofrandom = {"8C403AE6-9477-4CA1-832C-B5975D0F0C49","EB8A0EF1-FF95-48C5-BDB0-E6C218230C63","81B43368-D44E-4662-B4AB-B3564A78A155", "6823994F-EDB0-4494-AD45-D248EC4CD070", "83E8CB3C-33B5-4ECB-A4A2-86121EE0E17C", "DC6E1FEA-EABA-4D89-8F85-628D5353C245"}
+local tableofrandom = {"8C403AE6-9477-4CA1-832C-B5975D0F0C49","EB8A0EF1-FF95-48C5-BDB0-E6C218230C63","81B43368-D44E-4662-B4AB-B3564A78A155", "6823994F-EDB0-4494-AD45-D248EC4CD070", "83E8CB3C-33B5-4ECB-A4A2-86121EE0E17C"}
 local users = {}
 local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
 function getID(plr)
@@ -366,7 +381,7 @@ end
 local repstorage = game:GetService("ReplicatedStorage")
 local KnockbackTable = debug.getupvalue(require(game:GetService("ReplicatedStorage").TS.damage["knockback-util"]).KnockbackUtil.calculateKnockbackVelocity, 1)
 local cstore = require(lplr.PlayerScripts.TS.ui.store).ClientStore
-local bedwars = { -- xylex table stop bully dawn :(
+local bedwars = { -- this is litterally the only part of the script that isnt mine :/
 	["DropItemRemote"] = getremote(debug.getconstants(getmetatable(KnitClient.Controllers.ItemDropController).dropItemInHand)),
 	["SprintController"] = KnitClient.Controllers.SprintController,
 	["CombatConstant"] = require(repstorage.TS.combat["combat-constant"]).CombatConstant,
@@ -380,58 +395,121 @@ local bedwars = { -- xylex table stop bully dawn :(
 	["AppController"] = require(repstorage["rbxts_include"]["node_modules"]["@easy-games"]["game-core"].out.client.controllers["app-controller"]).AppController,
 	["SwordRemote"] = getremote(debug.getconstants((KnitClient.Controllers.SwordController).attackEntity)),
 }
-function isalive(plr)
-	plr = plr or lplr
-	if not plr.Character or not plr.Character:FindFirstChild("Humanoid") then return false end
+function isalive(player)
+	local character = player.Character
+	if not character then
+		-- the player does not have a character
+		return false
+	end
 
-	return true
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if not humanoid then
+		-- the character does not have a humanoid object
+		return false
+	end
+
+	return humanoid.Health > 0
 end
 
 local BedwarsSwords = require(game:GetService("ReplicatedStorage").TS.games.bedwars["bedwars-swords"]).BedwarsSwords
 function hashFunc(instance) 
 	return {value = instance}
 end
-local function GetInventory(plr) -- xylex
-	if not plr then 
+
+
+local function GetInventory(plr)
+	if not plr then
 		return {inv = {}, armor = {}}
 	end
 
-	local suc, ret = pcall(function() 
+	local success, result = pcall(function()
 		return require(game:GetService("ReplicatedStorage").TS.inventory["inventory-util"]).InventoryUtil.getInventory(plr)
 	end)
 
-	if not suc then 
+	if not success then
 		return {items = {}, armor = {}}
-	end 
-	if plr.Character and plr.Character:FindFirstChild("InventoryFolder") then 
+	end
+
+	if plr.Character and plr.Character:FindFirstChild("InventoryFolder") then
 		local invFolder = plr.Character:FindFirstChild("InventoryFolder").Value
-		if not invFolder then return ret end
-		for i,v in next, ret do 
-			for i2, v2 in next, v do 
-				if typeof(v2) == 'table' and v2.itemType then
-					v2.instance = invFolder:FindFirstChild(v2.itemType)
+		if not invFolder then return result end
+
+		for _, item in pairs(result) do
+			for _, subItem in pairs(item) do
+				if typeof(subItem) == "table" and subItem.itemType then
+					subItem.instance = invFolder:FindFirstChild(subItem.itemType)
 				end
 			end
-			if typeof(v) == 'table' and v.itemType then
-				v.instance = invFolder:FindFirstChild(v.itemType)
+
+			if typeof(item) == "table" and item.itemType then
+				item.instance = invFolder:FindFirstChild(item.itemType)
 			end
 		end
 	end
 
-	return ret
+	return result
 end
 local function getSword()
-	local highest, returning = -9e9, nil
-	for i,v in next, GetInventory(lplr).items do 
-		local power = table.find(BedwarsSwords, v.itemType)
-		if not power then continue end
-		if power > highest then 
-			returning = v
-			highest = power
+	-- Initialize the highest power value and the returning item to nil.
+	local highestPower = -9e9
+	local returningItem = nil
+
+	-- Get the inventory of the local player.
+	local inventory = GetInventory(lplr)
+
+	-- Loop through the items in the inventory.
+	for _, item in pairs(inventory.items) do
+		-- Check if the item is a sword.
+		local power = table.find(BedwarsSwords, item.itemType)
+		if not power then
+			-- Skip the item if it is not a sword.
+			continue
+		end
+
+		-- Check if the power of the current sword is higher than the current highest power.
+		if power > highestPower then
+			-- Set the returning item to the current sword and update the highest power value.
+			returningItem = item
+			highestPower = power
 		end
 	end
-	return returning
+
+	-- Return the item with the highest power.
+	return returningItem
 end
+
+local function getNearestPlayer(maxDist)
+	-- define the position or object that you want to use as the reference point
+	local referencePoint = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+
+	-- get the list of players currently connected to the game
+	local players = game:GetService("Players"):GetPlayers()
+
+	-- initialize variables to store the nearest player and their distance
+	local nearestPlayer = nil
+	local nearestDistance = maxDist
+
+	-- loop through all the players and find the nearest one
+	for _, player in pairs(players) do
+
+		if player ~= game.Players.LocalPlayer then
+			-- calculate the distance between the reference point and the player
+			local distance = (referencePoint - player.Character.PrimaryPart.Position).magnitude
+
+			-- check if this player is closer than the current nearest player
+			if distance < nearestDistance then
+				-- update the nearest player and distance
+				nearestPlayer = player
+				nearestDistance = distance
+			end
+
+		end
+	end
+	if nearestPlayer then
+		return nearestPlayer
+	end
+end
+
 local Distance = {["Value"] = 18}
 local Enabled = true
 
@@ -441,42 +519,37 @@ newTab("Visuals")
 newTab("Utility")
 newTab("Scripts")
 local count = 0
+
 local Killaura = windowapi.CreateButton({
 	["Name"] = "Killaura",
 	["Tab"] = "Combat",
 	["Function"] = function(callback)
 		if callback then -- credits to vape for being an example for me of how to add anims
-		local anims = {
-			Normal = {
-				{CFrame = CFrame.new(1, -1, 2) * CFrame.Angles(math.rad(295), math.rad(55), math.rad(290)), Time = 0.2},
-				{CFrame = CFrame.new(-1, 1, -2.2) * CFrame.Angles(math.rad(200), math.rad(60), math.rad(1)), Time = 0.2}
-				},
+			local animations = {
+				Normal = {
+					{CFrame = CFrame.Angles(22, 55, math.rad(10)), Time = 0.1},
+					{CFrame = CFrame.Angles(55, 22, math.rad(20)), Time = 0.1},
+					{CFrame = CFrame.Angles(22, 55, math.rad(30)), Time = 0.1},
+					{CFrame = CFrame.Angles(55, 22, math.rad(40)), Time = 0.1},
+					{CFrame = CFrame.Angles(22, 55, math.rad(50)), Time = 0.1}
+				}
 			}
 			local origC0 = cam.Viewmodel.RightHand.RightWrist.C0
 			local ui2 = Instance.new("ScreenGui")
 			local nearestID = nil
+			local TweenService = game:GetService("TweenService")
 			ui2.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 			repeat
 				for _,v in pairs(game.Players:GetPlayers()) do
 					if v ~= lplr then
 						nearestID = v
-						target = v.Name
-						if v.Team ~= lplr.Team and v ~= lplr and isalive(v) and v.Character:FindFirstChild("HumanoidRootPart") and (v.Character.HumanoidRootPart.Position - lplr.Character.HumanoidRootPart.Position).Magnitude < 20 then
+						if v.Team ~= lplr.Team and isalive(v) and v.Character:FindFirstChild("HumanoidRootPart") and (v.Character.HumanoidRootPart.Position - lplr.Character.HumanoidRootPart.Position).Magnitude < 18 then
 							local sword = getSword()
 							if sword ~= nil then
-								function swing()
-									spawn(function()
-										pcall(function()
-											for i,v in pairs(anims.Normal) do 
-												anim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
-												anim:Play()
-												task.wait(v.Time)
-											end
-										end)
-									end)
+								local function swing()
+
 								end
 								coroutine.wrap(swing)()
-
 								Client:Get(bedwars["SwordRemote"]):SendToServer({
 									["weapon"] = sword.tool,
 									["entityInstance"] = v.Character,																																																																																							
@@ -488,23 +561,13 @@ local Killaura = windowapi.CreateButton({
 										["targetPosition"] = hashFunc(v.Character:FindFirstChild("HumanoidRootPart").Position),
 										["selfPosition"] = hashFunc(lplr.Character:FindFirstChild("HumanoidRootPart").Position + ((lplr.Character:FindFirstChild("HumanoidRootPart").Position - v.Character:FindFirstChild("HumanoidRootPart").Position).magnitude > 14 and (CFrame.lookAt(lplr.Character:FindFirstChild("HumanoidRootPart").Position, v.Character:FindFirstChild("HumanoidRootPart").Position).LookVector * 4) or Vector3.new(0, 0, 0)))
 									},
-									["chargedAttack"] = {["chargeRatio"] = 0.5}
+									["chargedAttack"] = {["chargeRatio"] = 0.8}
 								})
 							end
 						end
 					end
 				end
-				task.wait(0.43);																																																																							bedwars["SwordController"].lastAttack = game:GetService("Workspace"):GetServerTimeNow() - 0.11
-				local function redo()
-					if cam.Viewmodel.RightHand.RightWrist.C0 ~= origC0 then
-						pcall(function()
-							anim:Cancel()
-						end)
-						anim2 = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(0.364), {C0 = origC0})
-						anim2:Play()
-					end
-				end
-				coroutine.wrap(redo)()
+				task.wait(0.12);																																																																							bedwars["SwordController"].lastAttack = game:GetService("Workspace"):GetServerTimeNow() - 0.11
 			until not Enabled
 		else
 			Enabled = false
@@ -522,49 +585,6 @@ local Velocity = windowapi.CreateButton({
 		else
 			KnockbackTable["kbDirectionStrength"] = 100
 			KnockbackTable["kbUpwardStrength"] = 100
-		end
-	end,
-})
-
-local HypixelFly = windowapi.CreateButton({
-	["Name"] = "BoostFly",
-	["Tab"] = "Movement",
-	["Function"] = function(callback)
-		if callback then
-			_G.HypixelFly = true
-			game.Workspace.Gravity = 0
-			while _G.HypixelFly == true do wait(0.2)
-				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 1
-				wait()
-				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.5
-				wait()
-				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 1
-				wait()
-				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.5
-				wait()
-				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 1
-				wait()
-				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.5
-				wait(0.9)
-			end
-		else
-			_G.HypixelFly = false
-
-			while _G.HypixelFly == true do wait(0.2)
-				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.6
-				wait()
-				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.6
-				wait()
-				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.6
-				wait()
-				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.6
-				wait()
-				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.6
-				wait()
-				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.6
-				wait(1)
-			end
-			game.Workspace.Gravity = 192.6
 		end
 	end,
 })
@@ -616,23 +636,40 @@ local CFrameSpeed = windowapi.CreateButton({
 	end,
 })
 
+local ljspeed = 1 -- base
+local s2 = 0.24 -- spoof ticks
+local s3 = 0.78 -- second base
 local longjumpenabled = nil
 local LongJump = windowapi.CreateButton({
 	["Name"] = "LongJump",
 	["Tab"] = "Movement",
 	["Function"] = function(callback)
 		if callback then
-			longjumpenabled = true
-			game.Players.LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-			game.Workspace.Gravity = 10
-			for i = 1,40 do wait(0.01)
-				if longjumpenabled then
-					lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame + Vector3.new(0,0.154,0)
-				end
-			end
+			local chr = lplr.Character or lplr.CharacterAdded:Wait()
+			local hrp = chr:WaitForChild("HumanoidRootPart")
+			workspace.Gravity = 0
+			local tweenService, tweenInfo, tweenInfo2, tweenInfo3 = game:GetService("TweenService"), TweenInfo.new(ljspeed, Enum.EasingStyle.Bounce),TweenInfo.new(1, Enum.EasingStyle.Cubic),TweenInfo.new(s3, Enum.EasingStyle.Quad)
+			local tween = tweenService:Create(game:GetService("Players")["LocalPlayer"].Character.HumanoidRootPart, tweenInfo2, {CFrame = hrp.CFrame + Vector3.new(0,100,0)})
+			tween:Play()
+			-- task.wait(tweenInfo2.Time - 0.03)
+			local tween = tweenService:Create(game:GetService("Players")["LocalPlayer"].Character.HumanoidRootPart, tweenInfo, {CFrame = hrp.CFrame + hrp.CFrame.LookVector * 40 + Vector3.new(0,23,0)})
+			local tween2 = tweenService:Create(game:GetService("Players")["LocalPlayer"].Character.HumanoidRootPart, tweenInfo3, {CFrame = hrp.CFrame + hrp.CFrame.LookVector * 80})
+			tween:Play()
+			tween2:Play()
+			task.wait(s2)
+			tween:Pause()
+			task.wait(s2+0.1)
+			tween2:Pause()
+			tween:Play()
+			tween2:Play()
+			task.wait(s2)
+			tween:Pause()
+			tween2:Pause()
+			task.wait(s2+0.1)
+			tween2:Play()
+			workspace.Gravity = 196.2
 		else
-			game.Workspace.Gravity = 192.6
-			longjumpenabled = false
+			workspace.Gravity = 196.2
 		end
 	end,
 })
@@ -697,7 +734,7 @@ Flight = windowapi.CreateButton({
 				timer.TextWrapped = true
 				function moveUP()
 					repeat wait()
-						lplr.Character.HumanoidRootPart.Velocity = Vector3.new(lplr.Character.HumanoidRootPart.Velocity.X,-0.0000000025,lplr.Character.HumanoidRootPart.Velocity.Z)
+						lplr.Character.HumanoidRootPart.Velocity = Vector3.new(lplr.Character.HumanoidRootPart.Velocity.X,0.0,lplr.Character.HumanoidRootPart.Velocity.Z)
 					until not isFlying
 				end
 				coroutine.wrap(moveUP)()
@@ -735,24 +772,44 @@ Flight = windowapi.CreateButton({
 	end,
 })
 
+local chamsenabled = nil
 local Chams = windowapi.CreateButton({
 	["Name"] = "Chams",
 	["Tab"] = "Visuals",
 	["Function"] = function(callback)
-		if callback then
-			local players = game.Players:GetPlayers()
+		local player = game.Players.LocalPlayer
+		local players = game.Players:GetPlayers()
 
-			for i,v in pairs(players) do
-				esp = Instance.new("Highlight")
-				esp.Name = v.Name
-				esp.FillTransparency = 0.5
-				esp.FillColor = Color3.new(1, 0, 1)
-				esp.OutlineColor = Color3.new(1, 0, 1)
-				esp.OutlineTransparency = 0
-				esp.Parent = v.Character
+		for i,v in pairs(players) do
+			if v ~= player then
+				if callback then
+					chamsenabled = true
+					esp = Instance.new("Highlight")
+					esp.Name = v.Name
+					esp.FillTransparency = 0.5
+					esp.FillColor = Color3.new(1, 0, 1)
+					esp.OutlineColor = Color3.new(0, 0, 1)
+					esp.OutlineTransparency = 0
+					esp.Parent = v.Character
+
+					-- Show the player's health
+
+					-- Blur the chams
+					blur = Instance.new("BlurEffect")
+					blur.Name = v.Name
+					blur.Size = 100000
+					blur.Parent = v.Character
+				else
+					-- Destroy the chams and health label
+					chamsenabled = false
+					if esp then
+						esp:Destroy()
+					end
+					if blur then
+						blur:Destroy()
+					end
+				end
 			end
-		else
-			esp:Destroy()
 		end
 	end,
 })
@@ -788,6 +845,8 @@ local Sprint = windowapi.CreateButton({
 		end
 	end,
 })
+local hrp = lplr.Character.HumanoidRootPart
+local tweenService = game:GetService("TweenService")
 local AntivoidEnabled = nil
 local AntiVoid = windowapi.CreateButton({
 	["Name"] = "AntiVoid",
@@ -797,12 +856,8 @@ local AntiVoid = windowapi.CreateButton({
 			AntivoidEnabled = true
 			repeat wait()
 				if lplr.Character.HumanoidRootPart.Position.Y < 10 then
-					local e = Instance.new("BodyVelocity",lplr.Character.HumanoidRootPart)
-					workspace.Gravity = 0
-					e.Velocity = Vector3.new(lplr.Character.HumanoidRootPart.Velocity.X,1000,lplr.Character.HumanoidRootPart.Velocity.Z)
-					task.wait(0.1)
-					e:Destroy()
-					workspace.Gravity = 196.2
+					local tween = tweenService:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(1.3), {CFrame = hrp.CFrame + hrp.CFrame.LookVector * 15 + Vector3.new(0,50,0)})
+					tween:Play()
 				end
 			until not AntivoidEnabled
 		else
@@ -810,6 +865,8 @@ local AntiVoid = windowapi.CreateButton({
 		end
 	end,
 })
+
+
 local stealerEnabled = nil
 local Stealer = windowapi.CreateButton({
 	["Name"] = "Stealer",
@@ -854,8 +911,8 @@ local NoBob = windowapi.CreateButton({ -- credits to vape for paths
 	end,
 })
 
-local BoostFly2 = windowapi.CreateButton({
-	["Name"] = "BoostFly2",
+local HypixelFlyV2 = windowapi.CreateButton({
+	["Name"] = "HypixelFlyV2 | Springs",
 	["Tab"] = "Scripts",
 	["Function"] = function(callback)
 		if callback then
@@ -883,26 +940,12 @@ local BoostFly2 = windowapi.CreateButton({
 			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.1
 			wait()
 			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.1
-			wait(1)
-			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.7
-			wait()
-			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.7
-			wait()
-			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.7
-			wait()
-			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.3
-			wait()
-			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.3
-			wait()
-			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.3
-			wait()
-			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame + game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector * 0.3
-			wait()
 		else
 			game.Workspace.Gravity = 192.6
 		end
 	end,
 })
+
 
 if not connections then
 	if isfile("MoonScripts/script.txt") then
